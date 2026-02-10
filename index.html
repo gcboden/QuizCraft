@@ -13,43 +13,71 @@
         }
 
         :root {
-            --primary: #FF6B35;
-            --secondary: #004E89;
-            --accent: #FFD23F;
-            --success: #06D6A0;
-            --danger: #EF476F;
+            --primary: #FF5733;        /* Coral Orange */
+            --secondary: #0F4C5C;      /* Deep Teal */
+            --accent: #D4AF37;         /* Golden Yellow */
+            --success: #2D7A3E;        /* Forest Green */
+            --danger: #C41E3A;         /* Deep Red */
+            --pink: #D946A6;           /* Hot Pink */
+            --light-pink: #F9A8D4;     /* Light Pink */
+            --sky-blue: #7DD3FC;       /* Sky Blue */
             --dark: #1A1A2E;
             --light: #F8F9FA;
         }
 
         body {
             font-family: 'DM Sans', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--sky-blue) 0%, var(--light-pink) 50%, var(--accent) 100%);
             min-height: 100vh;
             overflow-x: hidden;
-            padding-top: 80px;
+            padding-top: 0;
         }
 
-        /* Persistent Header Logo */
-        .header-logo {
+        /* Persistent Header Bar */
+        .header-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(26, 26, 46, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
+            height: 8px;
+            background: linear-gradient(90deg, var(--pink), var(--primary), var(--accent), var(--success), var(--secondary));
+            z-index: 1001;
+        }
+
+        /* Logo container - changes based on page */
+        .logo-container {
+            position: fixed;
+            top: 8px;
+            left: 0;
+            right: 0;
             z-index: 1000;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .logo-container.home-mode {
+            position: relative;
+            text-align: center;
+            padding: 3rem 0 1rem 0;
+            pointer-events: all;
+        }
+
+        .logo-container.nav-mode {
+            background: rgba(15, 76, 92, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 2rem;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            pointer-events: all;
         }
 
         .logo-link {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             text-decoration: none;
             cursor: pointer;
             transition: transform 0.3s ease;
+            pointer-events: all;
         }
 
         .logo-link:hover {
@@ -58,14 +86,36 @@
 
         .logo-text {
             font-family: 'Fredoka', sans-serif;
-            font-size: 1.5rem;
+            font-size: 3.5rem;
             font-weight: 700;
+            background: linear-gradient(135deg, var(--pink) 0%, var(--primary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            letter-spacing: 0.05em;
+            transition: font-size 0.3s ease;
+        }
+
+        .nav-mode .logo-text {
+            font-size: 1.5rem;
             color: white;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            background: none;
+            -webkit-text-fill-color: white;
         }
 
         .logo-emoji {
+            font-size: 3rem;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            transition: font-size 0.3s ease;
+        }
+
+        .nav-mode .logo-emoji {
             font-size: 1.8rem;
+        }
+
+        body.nav-page {
+            padding-top: 80px;
         }
 
         .stars {
@@ -114,9 +164,11 @@
 
         .card {
             background: white;
-            border-radius: 24px;
+            border-radius: 32px;
             padding: 3rem;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.3),
+                inset 0 -2px 0 rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
         }
@@ -127,18 +179,35 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 8px;
-            background: linear-gradient(90deg, var(--primary), var(--accent), var(--success), var(--secondary));
+            height: 12px;
+            background: linear-gradient(90deg, var(--pink), var(--primary), var(--accent), var(--success), var(--secondary), var(--pink));
+            border-radius: 32px 32px 0 0;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
         }
 
         h1 {
             font-family: 'Fredoka', sans-serif;
-            font-size: 3.5rem;
-            color: white;
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--pink) 0%, var(--primary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-align: center;
-            margin-bottom: 1rem;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.3));
             animation: slideDown 0.6s ease;
+            letter-spacing: 0.02em;
         }
 
         @keyframes slideDown {
@@ -148,17 +217,21 @@
 
         h2 {
             font-family: 'Fredoka', sans-serif;
-            font-size: 2rem;
-            color: var(--dark);
+            font-size: 2.5rem;
+            color: var(--secondary);
             margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         .subtitle {
             text-align: center;
-            color: rgba(255,255,255,0.95);
-            font-size: 1.2rem;
+            color: var(--secondary);
+            font-size: 1.5rem;
+            font-weight: 700;
             margin-bottom: 3rem;
             animation: slideDown 0.6s ease 0.1s backwards;
+            font-family: 'Fredoka', sans-serif;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
         }
 
         /* Recent Quizzes Section */
@@ -181,19 +254,24 @@
         }
 
         .quiz-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            padding: 1.5rem;
-            border-radius: 16px;
+            background: linear-gradient(135deg, var(--pink) 0%, var(--primary) 100%);
+            padding: 2rem;
+            border-radius: 24px;
             color: white;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 
+                0 6px 0 rgba(0,0,0,0.2),
+                0 8px 20px rgba(0,0,0,0.2);
             position: relative;
+            border: 4px solid rgba(255,255,255,0.3);
         }
 
         .quiz-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            transform: translateY(-6px) rotate(-1deg);
+            box-shadow: 
+                0 10px 0 rgba(0,0,0,0.2),
+                0 15px 35px rgba(0,0,0,0.3);
         }
 
         .quiz-card h4 {
@@ -305,24 +383,44 @@
 
         .btn-group {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             justify-content: center;
             flex-wrap: wrap;
             margin-top: 2rem;
         }
 
+        .home-actions {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 3rem 0;
+            padding: 0;
+        }
+
+        .home-actions .btn {
+            min-width: 200px;
+            box-shadow: 
+                0 8px 0 rgba(0,0,0,0.2),
+                0 12px 30px rgba(0,0,0,0.25);
+        }
+
         .btn {
             font-family: 'Fredoka', sans-serif;
-            padding: 1rem 2.5rem;
-            font-size: 1.2rem;
+            padding: 1.25rem 3rem;
+            font-size: 1.3rem;
             border: none;
-            border-radius: 16px;
+            border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 
+                0 6px 0 rgba(0,0,0,0.2),
+                0 8px 20px rgba(0,0,0,0.15);
             position: relative;
             overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .btn::before {
@@ -343,8 +441,18 @@
             height: 300px;
         }
 
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 0 rgba(0,0,0,0.2),
+                0 12px 28px rgba(0,0,0,0.2);
+        }
+
         .btn:active {
-            transform: scale(0.95);
+            transform: translateY(2px);
+            box-shadow: 
+                0 2px 0 rgba(0,0,0,0.2),
+                0 4px 12px rgba(0,0,0,0.15);
         }
 
         .btn-primary {
@@ -756,8 +864,11 @@
     </style>
 </head>
 <body>
-    <!-- Persistent Header Logo -->
-    <div class="header-logo">
+    <!-- Decorative Header Bar -->
+    <div class="header-bar"></div>
+    
+    <!-- Logo Container - switches between home and nav modes -->
+    <div class="logo-container home-mode" id="logoContainer">
         <a class="logo-link" onclick="goHome()">
             <span class="logo-emoji">🧠</span>
             <span class="logo-text">LetsGetQuizzy</span>
@@ -771,20 +882,39 @@
     <div class="container">
         <!-- Home Screen -->
         <div id="homeScreen" class="screen active">
-            <h1>Welcome Back!</h1>
-            <p class="subtitle">Ready to get quizzy with it?</p>
+            <p class="subtitle">Get Quizzy With It!</p>
             
+            <!-- Floating Action Buttons -->
+            <div class="home-actions">
+                <button class="btn btn-primary" onclick="showScreen('createQuizScreen')">Create Quiz</button>
+                <button class="btn btn-secondary" onclick="showScreen('hostScreen')">Host Game</button>
+                <button class="btn btn-success" onclick="showScreen('joinScreen')">Join Game</button>
+            </div>
+
+            <!-- Recent Quizzes Card -->
             <div class="card">
-                <!-- Recent Quizzes -->
                 <div class="recent-quizzes" id="recentQuizzesSection" style="display: none;">
-                    <h3>📚 Your Recent Quizzes</h3>
+                    <h3 style="color: var(--secondary); font-family: 'Fredoka', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem;">📚 Your Quizzes</h3>
                     <div class="quiz-list" id="recentQuizzesList"></div>
                 </div>
-
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="showScreen('createQuizScreen')">Create Quiz</button>
-                    <button class="btn btn-secondary" onclick="showScreen('hostScreen')">Host Game</button>
-                    <button class="btn btn-success" onclick="showScreen('joinScreen')">Join Game</button>
+                
+                <!-- Quick Actions Section -->
+                <div id="quickActionsSection" style="margin-top: 2rem; padding-top: 2rem; border-top: 3px dashed rgba(0,0,0,0.1);">
+                    <h3 style="color: var(--secondary); font-family: 'Fredoka', sans-serif; font-size: 1.5rem; margin-bottom: 1rem;">✨ Quick Actions</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div style="padding: 1rem; background: linear-gradient(135deg, var(--sky-blue) 0%, var(--secondary) 100%); border-radius: 16px; color: white; text-align: center; cursor: pointer; transition: transform 0.3s ease;" onclick="alert('Coming soon! 🚀')">
+                            <div style="font-size: 2rem;">🎲</div>
+                            <div style="font-weight: 600; margin-top: 0.5rem;">Random Quiz</div>
+                        </div>
+                        <div style="padding: 1rem; background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%); border-radius: 16px; color: white; text-align: center; cursor: pointer; transition: transform 0.3s ease;" onclick="alert('Coming soon! 🚀')">
+                            <div style="font-size: 2rem;">📋</div>
+                            <div style="font-weight: 600; margin-top: 0.5rem;">Quiz Templates</div>
+                        </div>
+                        <div style="padding: 1rem; background: linear-gradient(135deg, var(--success) 0%, var(--sky-blue) 100%); border-radius: 16px; color: white; text-align: center; cursor: pointer; transition: transform 0.3s ease;" onclick="alert('Coming soon! 🚀')">
+                            <div style="font-size: 2rem;">🏆</div>
+                            <div style="font-weight: 600; margin-top: 0.5rem;">Leaderboard</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1032,6 +1162,20 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
             
+            // Switch logo mode
+            const logoContainer = document.getElementById('logoContainer');
+            const body = document.body;
+            
+            if (screenId === 'homeScreen') {
+                logoContainer.classList.remove('nav-mode');
+                logoContainer.classList.add('home-mode');
+                body.classList.remove('nav-page');
+            } else {
+                logoContainer.classList.remove('home-mode');
+                logoContainer.classList.add('nav-mode');
+                body.classList.add('nav-page');
+            }
+            
             if (screenId === 'createQuizScreen' && document.querySelectorAll('.question-item').length === 0) {
                 addQuestion();
             }
@@ -1049,6 +1193,12 @@
             currentPlayer = null;
             currentQuiz = null;
             gamePin = '';
+            
+            // Switch to home mode
+            const logoContainer = document.getElementById('logoContainer');
+            logoContainer.classList.remove('nav-mode');
+            logoContainer.classList.add('home-mode');
+            document.body.classList.remove('nav-page');
             
             showScreen('homeScreen');
             displayRecentQuizzes();
