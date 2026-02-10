@@ -188,6 +188,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
         }
 
         .quiz-card:hover {
@@ -199,11 +200,107 @@
             font-family: 'Fredoka', sans-serif;
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
+            padding-right: 2rem;
         }
 
         .quiz-card p {
             font-size: 0.9rem;
             opacity: 0.9;
+        }
+
+        .quiz-menu-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .quiz-menu-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .quiz-menu-dropdown {
+            position: absolute;
+            top: 3rem;
+            right: 1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            min-width: 160px;
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .quiz-menu-dropdown.active {
+            display: block;
+            animation: dropdownSlide 0.2s ease;
+        }
+
+        @keyframes dropdownSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .quiz-menu-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: var(--dark);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quiz-menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .quiz-menu-item.delete:hover {
+            background: #fee;
+            color: var(--danger);
+        }
+
+        /* Text input answer styles */
+        .text-input-answer {
+            width: 100%;
+            padding: 1.5rem;
+            border: 3px solid #E0E0E0;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-family: 'DM Sans', sans-serif;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .text-input-answer:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+        }
+
+        .text-input-container {
+            margin: 2rem 0;
         }
 
         .btn-group {
@@ -862,14 +959,14 @@
         import { getDatabase, ref, set, get, onValue, update, remove, push, child } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         // TODO: Replace with your Firebase config
-       const firebaseConfig = {
-            apiKey: "AIzaSyCd4pwS1gYKtMYjFychTVQqfIp7A8sMBTM",
-            authDomain: "quizcraft-e3e3c.firebaseapp.com",
-            databaseURL: "https://quizcraft-e3e3c-default-rtdb.firebaseio.com",
-            projectId: "quizcraft-e3e3c",
-            storageBucket: "quizcraft-e3e3c.firebasestorage.app",
-            messagingSenderId: "35069708047",
-            appId: "1:35069708047:web:960f19442093a567f4a07a"
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         // Initialize Firebase
@@ -972,19 +1069,213 @@
             const recentQuizzes = quizzes.slice(-6).reverse(); // Show last 6, most recent first
             
             listDiv.innerHTML = recentQuizzes.map(quiz => `
-                <div class="quiz-card" onclick="quickHostQuiz(${quiz.id})">
+                <div class="quiz-card" onclick="quickHostQuiz(${quiz.id}, event)">
+                    <button class="quiz-menu-btn" onclick="toggleQuizMenu(event, ${quiz.id})">⋮</button>
+                    <div class="quiz-menu-dropdown" id="menu-${quiz.id}">
+                        <div class="quiz-menu-item" onclick="editQuiz(${quiz.id}, event)">
+                            ✏️ Edit Quiz
+                        </div>
+                        <div class="quiz-menu-item" onclick="duplicateQuiz(${quiz.id}, event)">
+                            📋 Duplicate Quiz
+                        </div>
+                        <div class="quiz-menu-item delete" onclick="deleteQuiz(${quiz.id}, event)">
+                            🗑️ Delete Quiz
+                        </div>
+                    </div>
                     <h4>${quiz.title}</h4>
                     <p>${quiz.questions.length} question${quiz.questions.length !== 1 ? 's' : ''}</p>
                 </div>
             `).join('');
         }
 
-        function quickHostQuiz(quizId) {
+        function quickHostQuiz(quizId, event) {
+            // Don't host if clicking menu button or menu items
+            if (event && (event.target.closest('.quiz-menu-btn') || event.target.closest('.quiz-menu-dropdown'))) {
+                return;
+            }
+            
             playSound('joinSound');
             currentQuiz = quizzes.find(q => q.id == quizId);
             startHostingQuiz();
         }
         window.quickHostQuiz = quickHostQuiz;
+
+        // Quiz menu functions
+        function toggleQuizMenu(event, quizId) {
+            event.stopPropagation();
+            playSound('tickSound');
+            
+            // Close all other menus
+            document.querySelectorAll('.quiz-menu-dropdown').forEach(menu => {
+                if (menu.id !== `menu-${quizId}`) {
+                    menu.classList.remove('active');
+                }
+            });
+            
+            const menu = document.getElementById(`menu-${quizId}`);
+            menu.classList.toggle('active');
+        }
+        window.toggleQuizMenu = toggleQuizMenu;
+
+        // Close menus when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.quiz-menu-btn') && !e.target.closest('.quiz-menu-dropdown')) {
+                document.querySelectorAll('.quiz-menu-dropdown').forEach(menu => {
+                    menu.classList.remove('active');
+                });
+            }
+        });
+
+        let editingQuizId = null;
+
+        function editQuiz(quizId, event) {
+            event.stopPropagation();
+            playSound('tickSound');
+            
+            const quiz = quizzes.find(q => q.id == quizId);
+            if (!quiz) return;
+            
+            editingQuizId = quizId;
+            
+            // Populate the create quiz screen with existing data
+            document.getElementById('quizTitle').value = quiz.title;
+            
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            questionCount = 0;
+            
+            quiz.questions.forEach((q, idx) => {
+                questionCount++;
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-item';
+                questionDiv.innerHTML = `
+                    <button class="delete-question-btn" onclick="deleteQuestion(this)">Delete</button>
+                    <h3>Question ${questionCount}</h3>
+                    <div class="input-group">
+                        <label>Question Type</label>
+                        <select class="question-type-select" onchange="updateQuestionFields(this)">
+                            <option value="multiple-choice" ${q.type === 'multiple-choice' ? 'selected' : ''}>Multiple Choice</option>
+                            <option value="true-false" ${q.type === 'true-false' ? 'selected' : ''}>True/False</option>
+                            <option value="multiple-select" ${q.type === 'multiple-select' ? 'selected' : ''}>Multiple Select</option>
+                            <option value="text-input" ${q.type === 'text-input' ? 'selected' : ''}>Text Input</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Question Text</label>
+                        <input type="text" class="question-text-input" placeholder="Enter question..." value="${q.question}">
+                    </div>
+                    <div class="input-group">
+                        <label>Time Limit (seconds)</label>
+                        <input type="number" class="question-time-input" value="${q.timeLimit}" min="5" max="120">
+                    </div>
+                    <div class="question-specific-fields">
+                        ${getEditQuestionTypeFields(q, questionCount)}
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+            
+            showScreen('createQuizScreen');
+        }
+        window.editQuiz = editQuiz;
+
+        function getEditQuestionTypeFields(question, qNum) {
+            switch(question.type) {
+                case 'multiple-choice':
+                    return `
+                        ${question.answers.map((answer, i) => `
+                            <div class="answer-input-group">
+                                <input type="text" class="answer-text-input" placeholder="Answer ${i + 1}" data-index="${i}" value="${answer}">
+                                <label class="correct-checkbox">
+                                    <input type="radio" name="correct-${qNum}" class="correct-answer-radio" data-index="${i}" ${question.correctIndex === i ? 'checked' : ''}>
+                                    Correct
+                                </label>
+                            </div>
+                        `).join('')}
+                    `;
+                case 'true-false':
+                    return `
+                        <div class="answer-input-group">
+                            <div style="padding: 1rem; font-size: 1.1rem;">True</div>
+                            <label class="correct-checkbox">
+                                <input type="radio" name="correct-${qNum}" class="correct-answer-radio" data-index="0" ${question.correctIndex === 0 ? 'checked' : ''}>
+                                Correct
+                            </label>
+                        </div>
+                        <div class="answer-input-group">
+                            <div style="padding: 1rem; font-size: 1.1rem;">False</div>
+                            <label class="correct-checkbox">
+                                <input type="radio" name="correct-${qNum}" class="correct-answer-radio" data-index="1" ${question.correctIndex === 1 ? 'checked' : ''}>
+                                Correct
+                            </label>
+                        </div>
+                    `;
+                case 'multiple-select':
+                    return `
+                        <p style="color: #666; margin-bottom: 1rem; font-style: italic;">Check all correct answers</p>
+                        ${question.answers.map((answer, i) => `
+                            <div class="answer-input-group">
+                                <input type="text" class="answer-text-input" placeholder="Answer ${i + 1}" data-index="${i}" value="${answer}">
+                                <label class="correct-checkbox">
+                                    <input type="checkbox" class="correct-answer-checkbox" data-index="${i}" ${question.correctIndices.includes(i) ? 'checked' : ''}>
+                                    Correct
+                                </label>
+                            </div>
+                        `).join('')}
+                    `;
+                case 'text-input':
+                    return `
+                        <div class="input-group">
+                            <label>Accepted Answers (separate with commas - case insensitive)</label>
+                            <input type="text" class="text-answer-input" placeholder="e.g., Paris, paris, The City of Light" value="${question.correctAnswers ? question.correctAnswers.join(', ') : ''}">
+                            <p style="color: #666; margin-top: 0.5rem; font-size: 0.9rem;">All variations will be accepted regardless of capitalization</p>
+                        </div>
+                    `;
+                default:
+                    return '';
+            }
+        }
+
+        function duplicateQuiz(quizId, event) {
+            event.stopPropagation();
+            playSound('correctSound');
+            
+            const quiz = quizzes.find(q => q.id == quizId);
+            if (!quiz) return;
+            
+            const duplicatedQuiz = {
+                id: Date.now(),
+                title: quiz.title + ' (Copy)',
+                questions: JSON.parse(JSON.stringify(quiz.questions)) // Deep copy
+            };
+            
+            quizzes.push(duplicatedQuiz);
+            localStorage.setItem('quizzes', JSON.stringify(quizzes));
+            
+            displayRecentQuizzes();
+            loadQuizzes();
+            
+            // Show a brief notification
+            alert(`Quiz duplicated! "${duplicatedQuiz.title}" has been added to your quizzes.`);
+        }
+        window.duplicateQuiz = duplicateQuiz;
+
+        function deleteQuiz(quizId, event) {
+            event.stopPropagation();
+            
+            const quiz = quizzes.find(q => q.id == quizId);
+            if (!quiz) return;
+            
+            if (confirm(`Are you sure you want to delete "${quiz.title}"? This cannot be undone.`)) {
+                playSound('wrongSound');
+                quizzes = quizzes.filter(q => q.id !== quizId);
+                localStorage.setItem('quizzes', JSON.stringify(quizzes));
+                
+                displayRecentQuizzes();
+                loadQuizzes();
+            }
+        }
+        window.deleteQuiz = deleteQuiz;
 
         async function startHostingQuiz() {
             gamePin = Math.floor(100000 + Math.random() * 900000).toString();
@@ -1026,6 +1317,7 @@
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="true-false">True/False</option>
                         <option value="multiple-select">Multiple Select</option>
+                        <option value="text-input">Text Input</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -1093,6 +1385,14 @@
                                 </label>
                             </div>
                         `).join('')}
+                    `;
+                case 'text-input':
+                    return `
+                        <div class="input-group">
+                            <label>Accepted Answers (separate with commas - case insensitive)</label>
+                            <input type="text" class="text-answer-input" placeholder="e.g., Paris, paris, The City of Light">
+                            <p style="color: #666; margin-top: 0.5rem; font-size: 0.9rem;">All variations will be accepted regardless of capitalization</p>
+                        </div>
                     `;
                 default:
                     return '';
@@ -1170,6 +1470,14 @@
                             questions.push(questionData);
                         }
                         break;
+
+                    case 'text-input':
+                        const textAnswer = item.querySelector('.text-answer-input')?.value;
+                        if (textAnswer) {
+                            questionData.correctAnswers = textAnswer.split(',').map(a => a.trim().toLowerCase());
+                            questions.push(questionData);
+                        }
+                        break;
                 }
             });
 
@@ -1178,11 +1486,21 @@
                 return;
             }
 
-            const quiz = { id: Date.now(), title, questions };
-            quizzes.push(quiz);
-            localStorage.setItem('quizzes', JSON.stringify(quizzes));
+            // Check if we're editing an existing quiz
+            if (editingQuizId) {
+                const quizIndex = quizzes.findIndex(q => q.id === editingQuizId);
+                if (quizIndex !== -1) {
+                    quizzes[quizIndex] = { id: editingQuizId, title, questions };
+                    alert('Quiz updated successfully!');
+                }
+                editingQuizId = null;
+            } else {
+                const quiz = { id: Date.now(), title, questions };
+                quizzes.push(quiz);
+                alert('Quiz saved successfully!');
+            }
             
-            alert('Quiz saved successfully!');
+            localStorage.setItem('quizzes', JSON.stringify(quizzes));
             goHome();
             document.getElementById('quizTitle').value = '';
             document.getElementById('questionsContainer').innerHTML = '';
@@ -1379,7 +1697,9 @@
         }
 
         function renderHostAnswerView(question) {
-            if (question.type === 'multiple-select') {
+            if (question.type === 'text-input') {
+                return `<div style="text-align: center; padding: 2rem; font-size: 1.3rem; color: #666;">Players are typing their answers...</div>`;
+            } else if (question.type === 'multiple-select') {
                 return `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                     ${question.answers.map((answer, idx) => `
                         <div class="multi-select-item">${answer}</div>
@@ -1393,7 +1713,14 @@
         }
 
         function renderPlayerAnswerView(question) {
-            if (question.type === 'multiple-select') {
+            if (question.type === 'text-input') {
+                return `
+                    <div class="text-input-container">
+                        <input type="text" class="text-input-answer" id="textInputAnswer" placeholder="Type your answer..." autocomplete="off">
+                        <button class="btn btn-primary submit-answer-btn" onclick="submitTextAnswer()">Submit Answer</button>
+                    </div>
+                `;
+            } else if (question.type === 'multiple-select') {
                 return `
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;" id="multiSelectGrid">
                         ${question.answers.map((answer, idx) => `
@@ -1551,6 +1878,56 @@
         }
         window.submitAnswer = submitAnswer;
 
+        async function submitTextAnswer() {
+            const question = currentQuiz.questions[currentQuestionIndex];
+            const userAnswer = document.getElementById('textInputAnswer')?.value.toLowerCase().trim();
+            
+            if (!userAnswer) {
+                alert('Please enter an answer!');
+                return;
+            }
+
+            const isCorrect = question.correctAnswers.includes(userAnswer);
+            const pointsEarned = isCorrect ? Math.floor((timeLeft / question.timeLimit) * 1000) : 0;
+
+            playSound(isCorrect ? 'correctSound' : 'wrongSound');
+
+            currentPlayer.score += pointsEarned;
+
+            // Show visual feedback
+            const input = document.getElementById('textInputAnswer');
+            input.disabled = true;
+            input.style.borderColor = isCorrect ? '#06D6A0' : '#EF476F';
+            input.style.background = isCorrect ? 'rgba(6, 214, 160, 0.1)' : 'rgba(239, 71, 111, 0.1)';
+
+            try {
+                await window.dbSet(
+                    window.dbRef(window.db, `games/${gamePin}/answers/${currentQuestionIndex}/${currentPlayer.id}`),
+                    {
+                        userAnswer: userAnswer,
+                        isCorrect: isCorrect,
+                        points: pointsEarned,
+                        timestamp: Date.now()
+                    }
+                );
+
+                const newScore = (await window.dbGet(window.dbRef(window.db, `games/${gamePin}/players/${currentPlayer.id}/score`))).val() || 0;
+                await window.dbUpdate(
+                    window.dbRef(window.db, `games/${gamePin}/players/${currentPlayer.id}`),
+                    { score: newScore + pointsEarned }
+                );
+
+                setTimeout(() => {
+                    showScreen('playerAnsweredScreen');
+                }, 1500);
+            } catch (error) {
+                console.error('Error submitting answer:', error);
+            }
+
+            updateAnsweredCount();
+        }
+        window.submitTextAnswer = submitTextAnswer;
+
         function listenToAnswers() {
             const answersRef = window.dbRef(window.db, `games/${gamePin}/answers/${currentQuestionIndex}`);
             window.dbOnValue(answersRef, (snapshot) => {
@@ -1593,7 +1970,9 @@
                 const question = currentQuiz.questions[currentQuestionIndex];
                 
                 let correctAnswerText = '';
-                if (question.type === 'multiple-select') {
+                if (question.type === 'text-input') {
+                    correctAnswerText = question.correctAnswers.join(' or ');
+                } else if (question.type === 'multiple-select') {
                     correctAnswerText = question.correctIndices.map(i => question.answers[i]).join(', ');
                 } else {
                     correctAnswerText = question.answers[question.correctIndex];
