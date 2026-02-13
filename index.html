@@ -1338,13 +1338,13 @@
 
         // TODO: Replace with your Firebase config
         const firebaseConfig = {
-            apiKey: "AIzaSyCd4pwS1gYKtMYjFychTVQqfIp7A8sMBTM",
-            authDomain: "quizcraft-e3e3c.firebaseapp.com",
-            databaseURL: "https://quizcraft-e3e3c-default-rtdb.firebaseio.com",
-            projectId: "quizcraft-e3e3c",
-            storageBucket: "quizcraft-e3e3c.firebasestorage.app",
-            messagingSenderId: "35069708047",
-            appId: "1:35069708047:web:960f19442093a567f4a07a"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         // Initialize Firebase
@@ -2794,30 +2794,83 @@
                     status: 'finished'
                 });
 
+                const gameSnapshot = await window.dbGet(window.dbRef(window.db, `games/${gamePin}`));
+                const gameData = gameSnapshot.val();
                 const playersSnapshot = await window.dbGet(window.dbRef(window.db, `games/${gamePin}/players`));
                 const players = playersSnapshot.val() || {};
 
-                const sortedPlayers = Object.entries(players)
-                    .map(([id, data]) => ({
-                        id,
-                        name: data.name,
-                        score: data.score || 0
-                    }))
-                    .sort((a, b) => b.score - a.score);
-
                 const leaderboard = document.getElementById('finalLeaderboard');
-                leaderboard.innerHTML = sortedPlayers.map((player, idx) => {
-                    const rankClass = idx === 0 ? 'first' : idx === 1 ? 'second' : idx === 2 ? 'third' : '';
-                    return `
-                        <div class="leaderboard-item" style="animation-delay: ${idx * 0.1}s">
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span class="rank ${rankClass}">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}</span>
-                                <span>${player.name}</span>
-                            </div>
-                            <span class="score">${player.score}</span>
-                        </div>
+                
+                // Check if teams were enabled
+                if (gameData.teamsEnabled && gameData.teams) {
+                    // Calculate team scores
+                    const teamScores = {};
+                    Object.entries(gameData.teams).forEach(([teamId, teamData]) => {
+                        teamScores[teamId] = {
+                            name: teamData.name,
+                            color: teamData.bg,
+                            score: 0,
+                            members: []
+                        };
+                    });
+                    
+                    // Add up scores for each team
+                    Object.entries(players).forEach(([id, data]) => {
+                        if (data.team && teamScores[data.team]) {
+                            teamScores[data.team].score += data.score || 0;
+                            teamScores[data.team].members.push(data.name);
+                        }
+                    });
+                    
+                    // Sort teams by score
+                    const sortedTeams = Object.entries(teamScores)
+                        .map(([id, data]) => ({ id, ...data }))
+                        .sort((a, b) => b.score - a.score);
+                    
+                    // Show team results
+                    leaderboard.innerHTML = `
+                        <h3 style="text-align: center; color: var(--blue-electric); margin-bottom: 2rem; font-size: 2rem;">
+                            ${sortedTeams[0].name} WINS! 🎉
+                        </h3>
+                        ${sortedTeams.map((team, idx) => {
+                            const rankEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1);
+                            return `
+                                <div class="leaderboard-item" style="background: ${team.color}; animation-delay: ${idx * 0.1}s">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <span class="rank" style="font-size: 2.5rem;">${rankEmoji}</span>
+                                        <div>
+                                            <div style="font-size: 1.5rem; font-weight: 700;">${team.name}</div>
+                                            <div style="font-size: 0.9rem; opacity: 0.9;">${team.members.join(', ')}</div>
+                                        </div>
+                                    </div>
+                                    <span class="score" style="font-size: 2rem;">${team.score}</span>
+                                </div>
+                            `;
+                        }).join('')}
                     `;
-                }).join('');
+                } else {
+                    // Individual results (no teams)
+                    const sortedPlayers = Object.entries(players)
+                        .map(([id, data]) => ({
+                            id,
+                            name: data.name,
+                            score: data.score || 0
+                        }))
+                        .sort((a, b) => b.score - a.score);
+
+                    leaderboard.innerHTML = sortedPlayers.map((player, idx) => {
+                        const rankClass = idx === 0 ? 'first' : idx === 1 ? 'second' : idx === 2 ? 'third' : '';
+                        return `
+                            <div class="leaderboard-item" style="animation-delay: ${idx * 0.1}s">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <span class="rank ${rankClass}">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}</span>
+                                    <span>${player.name}</span>
+                                </div>
+                                <span class="score">${player.score}</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
 
                 showScreen('finalResultsScreen');
                 createConfetti();
@@ -2828,30 +2881,83 @@
 
         async function showFinalResultsForPlayer() {
             try {
+                const gameSnapshot = await window.dbGet(window.dbRef(window.db, `games/${gamePin}`));
+                const gameData = gameSnapshot.val();
                 const playersSnapshot = await window.dbGet(window.dbRef(window.db, `games/${gamePin}/players`));
                 const players = playersSnapshot.val() || {};
 
-                const sortedPlayers = Object.entries(players)
-                    .map(([id, data]) => ({
-                        id,
-                        name: data.name,
-                        score: data.score || 0
-                    }))
-                    .sort((a, b) => b.score - a.score);
-
                 const leaderboard = document.getElementById('finalLeaderboard');
-                leaderboard.innerHTML = sortedPlayers.map((player, idx) => {
-                    const rankClass = idx === 0 ? 'first' : idx === 1 ? 'second' : idx === 2 ? 'third' : '';
-                    return `
-                        <div class="leaderboard-item" style="animation-delay: ${idx * 0.1}s">
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span class="rank ${rankClass}">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}</span>
-                                <span>${player.name}</span>
-                            </div>
-                            <span class="score">${player.score}</span>
-                        </div>
+                
+                // Check if teams were enabled
+                if (gameData.teamsEnabled && gameData.teams) {
+                    // Calculate team scores
+                    const teamScores = {};
+                    Object.entries(gameData.teams).forEach(([teamId, teamData]) => {
+                        teamScores[teamId] = {
+                            name: teamData.name,
+                            color: teamData.bg,
+                            score: 0,
+                            members: []
+                        };
+                    });
+                    
+                    // Add up scores for each team
+                    Object.entries(players).forEach(([id, data]) => {
+                        if (data.team && teamScores[data.team]) {
+                            teamScores[data.team].score += data.score || 0;
+                            teamScores[data.team].members.push(data.name);
+                        }
+                    });
+                    
+                    // Sort teams by score
+                    const sortedTeams = Object.entries(teamScores)
+                        .map(([id, data]) => ({ id, ...data }))
+                        .sort((a, b) => b.score - a.score);
+                    
+                    // Show team results
+                    leaderboard.innerHTML = `
+                        <h3 style="text-align: center; color: var(--blue-electric); margin-bottom: 2rem; font-size: 2rem;">
+                            ${sortedTeams[0].name} WINS! 🎉
+                        </h3>
+                        ${sortedTeams.map((team, idx) => {
+                            const rankEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1);
+                            return `
+                                <div class="leaderboard-item" style="background: ${team.color}; animation-delay: ${idx * 0.1}s">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <span class="rank" style="font-size: 2.5rem;">${rankEmoji}</span>
+                                        <div>
+                                            <div style="font-size: 1.5rem; font-weight: 700;">${team.name}</div>
+                                            <div style="font-size: 0.9rem; opacity: 0.9;">${team.members.join(', ')}</div>
+                                        </div>
+                                    </div>
+                                    <span class="score" style="font-size: 2rem;">${team.score}</span>
+                                </div>
+                            `;
+                        }).join('')}
                     `;
-                }).join('');
+                } else {
+                    // Individual results
+                    const sortedPlayers = Object.entries(players)
+                        .map(([id, data]) => ({
+                            id,
+                            name: data.name,
+                            score: data.score || 0
+                        }))
+                        .sort((a, b) => b.score - a.score);
+
+                    leaderboard.innerHTML = sortedPlayers.map((player, idx) => {
+                        const rankClass = idx === 0 ? 'first' : idx === 1 ? 'second' : idx === 2 ? 'third' : '';
+                        return `
+                            <div class="leaderboard-item" style="animation-delay: ${idx * 0.1}s">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <span class="rank ${rankClass}">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}</span>
+                                    <span>${player.name}</span>
+                                </div>
+                                <span class="score">${player.score}</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
 
                 showScreen('finalResultsScreen');
             } catch (error) {
