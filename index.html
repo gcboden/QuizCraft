@@ -843,87 +843,6 @@
                 font-size: 1.2rem;
             }
         }
-    
-        /* === PHASE 1: TEAMS === */
-        .team-setup {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        .team-setup .input-row {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-        .toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-weight: 700;
-            color: white;
-            user-select: none;
-        }
-        .toggle input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-            accent-color: var(--primary);
-        }
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-        }
-        .team-box {
-            border-radius: 18px;
-            padding: 14px;
-            color: white;
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        .team-box h4 {
-            margin: 0;
-            font-size: 1.05rem;
-        }
-        .team-members {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .team-pill {
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.18);
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-        .team-choice {
-            cursor: pointer;
-            transition: transform 0.12s ease, filter 0.12s ease;
-        }
-        .team-choice:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.06);
-        }
-        .team-choice:active {
-            transform: translateY(0px);
-            filter: brightness(0.98);
-        }
-        .team-hint {
-            opacity: 0.85;
-            font-size: 0.9rem;
-            margin-top: auto;
-        }
-
     </style>
 </head>
 <body>
@@ -1025,29 +944,6 @@
                     <h3 style="color: white; text-align: center; margin-bottom: 1rem;">Players Waiting</h3>
                     <div class="player-grid" id="playersGrid"></div>
                 </div>
-                
-                <div class="team-setup">
-                    <div class="input-row">
-                        <label class="toggle">
-                            <input type="checkbox" id="enableTeams" onchange="toggleTeams()">
-                            Team Mode
-                        </label>
-
-                        <div class="input-group" style="max-width: 220px; margin: 0;">
-                            <label style="color: white;">Number of Teams</label>
-                            <select id="teamCount" onchange="updateTeamCount()" disabled>
-                                <option value="2">2 Teams</option>
-                                <option value="3">3 Teams</option>
-                                <option value="4">4 Teams</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="teamSetup" style="display:none;">
-                        <div class="team-grid" id="teamGrid"></div>
-                    </div>
-                </div>
-
                 <div class="btn-group">
                     <button class="btn btn-success" onclick="startGame()">Start Game</button>
                     <button class="btn btn-secondary" onclick="cancelGame()">Cancel</button>
@@ -1085,28 +981,8 @@
                 <p style="text-align: center; font-size: 1.2rem; color: #666;">
                     Get ready, <span id="waitingPlayerName" style="color: var(--primary); font-weight: 700;"></span>!
                 </p>
-                <div style="text-align: center; margin-top: 1rem;">
-                    <button class="btn btn-secondary" id="changeTeamBtn" style="display:none;" onclick="openTeamSelect()">Change Team</button>
-                </div>
-
             </div>
         </div>
-
-        
-        <!-- Team Selection Screen (Player) -->
-        <div id="teamSelectScreen" class="screen">
-            <div class="card">
-                <h2>🏆 Choose Your Team!</h2>
-                <p style="text-align:center; color:#666; margin-top:-0.5rem; margin-bottom:1.25rem;">
-                    Pick a team to join before the game starts.
-                </p>
-                <div class="team-grid" id="playerTeamGrid"></div>
-                <p style="text-align:center; margin-top:1rem; color:#666; font-size:0.95rem;">
-                    You can always switch teams while the host is still in the lobby.
-                </p>
-            </div>
-        </div>
-
 
         <!-- Question Screen (Host) -->
         <div id="hostQuestionScreen" class="screen">
@@ -1151,7 +1027,6 @@
             <div class="card">
                 <h2>📊 Question Results</h2>
                 <div id="correctAnswerDisplay" style="text-align: center; margin: 2rem 0;"></div>
-                <div class="leaderboard" id="teamQuestionLeaderboard" style="display:none;"></div>
                 <div class="leaderboard" id="questionLeaderboard"></div>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="nextQuestion()">Next Question</button>
@@ -1163,7 +1038,6 @@
         <div id="finalResultsScreen" class="screen">
             <div class="card">
                 <h2>🏆 Final Results</h2>
-                <div class="leaderboard" id="teamFinalLeaderboard" style="display:none;"></div>
                 <div class="leaderboard" id="finalLeaderboard"></div>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="goHome()">New Game</button>
@@ -1262,30 +1136,7 @@
         let gameTimer = null;
         let timeLeft = 20;
         let playersListener = null;
-
-        // === PHASE 1: Teams ===
-        let teamsEnabled = false;
-        let teams = {}; // { [teamId]: { name, color, score } }
-        let playerTeamId = null;
-
-        const teamColors = [
-            { id: 'team-orange-bright', name: 'Fire Team', color: '#ff5a00' },
-            { id: 'team-blue-electric', name: 'Lightning Team', color: '#0d70ff' },
-            { id: 'team-orange-gold', name: 'Gold Team', color: '#ff9e01' },
-            { id: 'team-blue-sky', name: 'Sky Team', color: '#43ccff' }
-        ];
-
-        function escapeHTML(str) {
-            return String(str ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
         let gameStateListener = null;
-        let lobbyGameListener = null;
 
         // Navigation
         function showScreen(screenId) {
@@ -1312,228 +1163,10 @@
         }
         window.showScreen = showScreen;
 
-        // === PHASE 1: Teams (Host + Player) ===
-        function toggleTeams() {
-            teamsEnabled = document.getElementById('enableTeams')?.checked || false;
-
-            const teamSetup = document.getElementById('teamSetup');
-            const teamCountSelect = document.getElementById('teamCount');
-
-            if (teamCountSelect) teamCountSelect.disabled = !teamsEnabled;
-            if (teamSetup) teamSetup.style.display = teamsEnabled ? 'block' : 'none';
-
-            if (teamsEnabled) {
-                updateTeamCount();
-            } else {
-                teams = {};
-                if (gamePin) {
-                    window.dbUpdate(window.dbRef(window.db, `games/${gamePin}`), {
-                        teamsEnabled: false,
-                        teams: {}
-                    });
-                }
-                const tq = document.getElementById('teamQuestionLeaderboard');
-                const tf = document.getElementById('teamFinalLeaderboard');
-                if (tq) tq.style.display = 'none';
-                if (tf) tf.style.display = 'none';
-            }
-        }
-        window.toggleTeams = toggleTeams;
-
-        function updateTeamCount() {
-            const count = parseInt(document.getElementById('teamCount')?.value || '2', 10);
-            const grid = document.getElementById('teamGrid');
-            if (!grid) return;
-
-            teams = {};
-            grid.innerHTML = '';
-
-            for (let i = 0; i < count; i++) {
-                const teamData = teamColors[i];
-                teams[teamData.id] = {
-                    name: teamData.name,
-                    color: teamData.color,
-                    score: 0
-                };
-
-                grid.innerHTML += `
-                    <div class="team-box" style="background: linear-gradient(135deg, ${teamData.color} 0%, rgba(0,0,0,0.25) 100%);">
-                        <h4>${escapeHTML(teamData.name)}</h4>
-                        <div class="team-members" id="${teamData.id}-members"></div>
-                        <p class="team-hint">Waiting for players…</p>
-                    </div>
-                `;
-            }
-
-            if (gamePin) {
-                window.dbUpdate(window.dbRef(window.db, `games/${gamePin}`), {
-                    teamsEnabled: true,
-                    teams: teams
-                });
-            }
-        }
-        window.updateTeamCount = updateTeamCount;
-
-        function updateTeamMemberListsFromDOM(playersList = []) {
-            if (!teamsEnabled) return;
-            const teamIds = Object.keys(teams || {});
-            if (!teamIds.length) return;
-
-            // clear
-            teamIds.forEach(tid => {
-                const el = document.getElementById(`${tid}-members`);
-                if (el) el.innerHTML = '';
-            });
-
-            // group
-            const byTeam = {};
-            teamIds.forEach(tid => byTeam[tid] = []);
-            playersList.forEach(p => {
-                if (p.teamId && byTeam[p.teamId]) byTeam[p.teamId].push(p);
-            });
-
-            teamIds.forEach(tid => {
-                const el = document.getElementById(`${tid}-members`);
-                if (!el) return;
-                if (!byTeam[tid].length) {
-                    el.innerHTML = '<span style="opacity:0.9;">—</span>';
-                    return;
-                }
-                el.innerHTML = byTeam[tid].map(p => `<span class="team-pill">${escapeHTML(p.name || 'Player')}</span>`).join('');
-            });
-        }
-
-        function renderPlayerTeamGrid(gameData) {
-            const grid = document.getElementById('playerTeamGrid');
-            if (!grid) return;
-
-            const enabled = !!gameData?.teamsEnabled;
-            const t = gameData?.teams || {};
-
-            teamsEnabled = enabled;
-            teams = t;
-
-            grid.innerHTML = '';
-
-            if (!enabled || !Object.keys(t).length) {
-                grid.innerHTML = '<p style="text-align:center; color:#666;">Team mode is not enabled for this game.</p>';
-                return;
-            }
-
-            Object.entries(t).forEach(([teamId, team]) => {
-                grid.innerHTML += `
-                    <div class="team-box team-choice" onclick="selectTeam('${teamId}')" style="background: linear-gradient(135deg, ${team.color || '#888'} 0%, rgba(0,0,0,0.25) 100%);">
-                        <h4>${escapeHTML(team.name || 'Team')}</h4>
-                        <p class="team-hint">Tap to join</p>
-                    </div>
-                `;
-            });
-        }
-
-        async function selectTeam(teamId) {
-            if (!gamePin || !currentPlayer) return;
-
-            playerTeamId = teamId;
-            currentPlayer.teamId = teamId;
-
-            try {
-                await window.dbUpdate(
-                    window.dbRef(window.db, `games/${gamePin}/players/${currentPlayer.id}`),
-                    { name: currentPlayer.name, score: 0, teamId: teamId }
-                );
-
-                const btn = document.getElementById('changeTeamBtn');
-                if (btn) btn.style.display = 'inline-flex';
-
-                document.getElementById('waitingPlayerName').textContent = currentPlayer.name;
-                showScreen('playerWaitingScreen');
-                listenToGameState();
-            } catch (error) {
-                console.error('Error selecting team:', error);
-                alert('Could not join team. Please try again.');
-            }
-        }
-        window.selectTeam = selectTeam;
-
-        async function openTeamSelect() {
-            if (!gamePin) return;
-
-            try {
-                const gameSnapshot = await window.dbGet(window.dbRef(window.db, `games/${gamePin}`));
-                const gameData = gameSnapshot.val() || {};
-                if (!gameData.teamsEnabled) return;
-
-                renderPlayerTeamGrid(gameData);
-                showScreen('teamSelectScreen');
-            } catch (e) {
-                console.error('Error opening team select:', e);
-            }
-        }
-        window.openTeamSelect = openTeamSelect;
-
-        function renderTeamLeaderboards(gameData) {
-            const enabled = !!gameData?.teamsEnabled;
-            const t = gameData?.teams || {};
-            const players = gameData?.players || {};
-
-            if (!enabled || !Object.keys(t).length) {
-                const teamQuestionEl = document.getElementById('teamQuestionLeaderboard');
-                const teamFinalEl = document.getElementById('teamFinalLeaderboard');
-                if (teamQuestionEl) teamQuestionEl.style.display = 'none';
-                if (teamFinalEl) teamFinalEl.style.display = 'none';
-                return;
-            }
-
-            const teamTotals = {};
-            Object.entries(t).forEach(([tid, team]) => {
-                teamTotals[tid] = {
-                    id: tid,
-                    name: team.name || tid,
-                    color: team.color || '#888',
-                    score: Number(team.score || 0)
-                };
-            });
-
-            const anyNonZero = Object.values(teamTotals).some(x => x.score > 0);
-            if (!anyNonZero) {
-                Object.entries(players).forEach(([pid, p]) => {
-                    const tid = p.teamId;
-                    if (!tid || !teamTotals[tid]) return;
-                    teamTotals[tid].score += Number(p.score || 0);
-                });
-            }
-
-            const sortedTeams = Object.values(teamTotals).sort((a, b) => b.score - a.score);
-            const htmlTeams = sortedTeams.map((tm, idx) => `
-                <div class="leaderboard-item">
-                    <span class="rank">#${idx + 1}</span>
-                    <span class="player-name">
-                        <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${tm.color};margin-right:8px;"></span>
-                        ${escapeHTML(tm.name)}
-                    </span>
-                    <span class="score">${tm.score}</span>
-                </div>
-            `).join('');
-
-            const teamQuestionEl = document.getElementById('teamQuestionLeaderboard');
-            const teamFinalEl = document.getElementById('teamFinalLeaderboard');
-
-            if (teamQuestionEl) {
-                teamQuestionEl.style.display = 'block';
-                teamQuestionEl.innerHTML = `<h3 style="margin:0 0 0.75rem 0; text-align:center;">Team Scores</h3>${htmlTeams}`;
-            }
-            if (teamFinalEl) {
-                teamFinalEl.style.display = 'block';
-                teamFinalEl.innerHTML = `<h3 style="margin:0 0 0.75rem 0; text-align:center;">Team Leaderboard</h3>${htmlTeams}`;
-            }
-        }
-
-
         function goHome() {
             // Clean up any active listeners
             if (playersListener) playersListener();
             if (gameStateListener) gameStateListener();
-            if (lobbyGameListener) lobbyGameListener();
             clearInterval(gameTimer);
             
             // Reset state
@@ -2035,77 +1668,27 @@
 
         function listenToPlayers() {
             const playersRef = window.dbRef(window.db, `games/${gamePin}/players`);
-            const gameRef = window.dbRef(window.db, `games/${gamePin}`);
-
-            // Listen to players list (for lobby UI)
             playersListener = window.dbOnValue(playersRef, (snapshot) => {
                 const playersData = snapshot.val();
                 const grid = document.getElementById('playersGrid');
-
+                
                 if (playersData) {
                     const playersList = Object.entries(playersData).map(([id, data]) => ({
                         id,
                         ...data
                     }));
-
+                    
                     // Play join sound for new players
                     if (playersList.length > (grid.children.length || 0)) {
                         playSound('joinSound');
                     }
-
+                    
                     grid.innerHTML = playersList.map(p => `
-                        <div class="player-card">${escapeHTML(p.name || 'Player')}</div>
+                        <div class="player-card">${p.name}</div>
                     `).join('');
-
-                    // Update team member lists if enabled
-                    updateTeamMemberListsFromDOM(playersList);
                 } else {
                     grid.innerHTML = '<p style="color: white; text-align: center;">Waiting for players...</p>';
-                    updateTeamMemberListsFromDOM([]);
                 }
-            });
-
-            // Listen to lobby settings (teamsEnabled/teams)
-            lobbyGameListener = window.dbOnValue(gameRef, (snapshot) => {
-                const gameData = snapshot.val() || {};
-
-                teamsEnabled = !!gameData.teamsEnabled;
-                teams = gameData.teams || {};
-
-                const enableEl = document.getElementById('enableTeams');
-                const teamCountEl = document.getElementById('teamCount');
-                const teamSetupEl = document.getElementById('teamSetup');
-
-                if (enableEl) enableEl.checked = teamsEnabled;
-                if (teamCountEl) teamCountEl.disabled = !teamsEnabled;
-                if (teamSetupEl) teamSetupEl.style.display = teamsEnabled ? 'block' : 'none';
-
-                // If host hasn't built UI boxes yet (or teams changed), rebuild grid
-                if (teamsEnabled && teamSetupEl) {
-                    // Determine count from teams keys
-                    const ids = Object.keys(teams);
-                    if (ids.length && teamCountEl) {
-                        teamCountEl.value = String(Math.min(Math.max(ids.length, 2), 4));
-                    }
-
-                    const grid = document.getElementById('teamGrid');
-                    if (grid && (!grid.children.length || grid.children.length !== ids.length)) {
-                        grid.innerHTML = '';
-                        ids.forEach((teamId) => {
-                            const t = teams[teamId];
-                            grid.innerHTML += `
-                                <div class="team-box" style="background: linear-gradient(135deg, ${t.color || '#888'} 0%, rgba(0,0,0,0.25) 100%);">
-                                    <h4>${escapeHTML(t.name || 'Team')}</h4>
-                                    <div class="team-members" id="${teamId}-members"></div>
-                                    <p class="team-hint">Waiting for players…</p>
-                                </div>
-                            `;
-                        });
-                    }
-                }
-
-                // Render team leaderboards if we're on results screens
-                renderTeamLeaderboards(gameData);
             });
         }
 
@@ -2142,19 +1725,6 @@
                     return;
                 }
 
-
-                if (gameData.status === 'lobby') {
-                    const btn = document.getElementById('changeTeamBtn');
-                    if (btn) btn.style.display = gameData.teamsEnabled ? 'inline-flex' : 'none';
-
-                    // If team mode is on and player hasn't picked yet, bounce them to selection
-                    if (gameData.teamsEnabled && currentPlayer && !currentPlayer.teamId) {
-                        renderPlayerTeamGrid(gameData);
-                        showScreen('teamSelectScreen');
-                        return;
-                    }
-                }
-
                 const gameData = gameSnapshot.val();
                 if (gameData.status !== 'lobby') {
                     alert('This game has already started!');
@@ -2165,22 +1735,8 @@
                 currentPlayer = {
                     id: Date.now().toString(),
                     name: name,
-                    score: 0,
-                    teamId: null
+                    score: 0
                 };
-
-                // If Team Mode is enabled, let player pick a team first
-                if (gameData.teamsEnabled) {
-                    // Create a placeholder player record (so host can see them join) without a team yet
-                    await window.dbSet(
-                        window.dbRef(window.db, `games/${gamePin}/players/${currentPlayer.id}`),
-                        { name: currentPlayer.name, score: 0, teamId: null }
-                    );
-
-                    renderPlayerTeamGrid(gameData);
-                    showScreen('teamSelectScreen');
-                    return;
-                }
 
                 await window.dbSet(
                     window.dbRef(window.db, `games/${gamePin}/players/${currentPlayer.id}`),
@@ -2393,23 +1949,6 @@
                     { score: newScore + pointsEarned }
                 );
 
-                // Update team score (best-effort)
-                try {
-                    const gsnap = await window.dbGet(window.dbRef(window.db, `games/${gamePin}`));
-                    const gdata = gsnap.val() || {};
-                    if (gdata.teamsEnabled && currentPlayer.teamId) {
-                        const tScoreSnap = await window.dbGet(window.dbRef(window.db, `games/${gamePin}/teams/${currentPlayer.teamId}/score`));
-                        const tScore = tScoreSnap.val() || 0;
-                        await window.dbUpdate(
-                            window.dbRef(window.db, `games/${gamePin}/teams/${currentPlayer.teamId}`),
-                            { score: tScore + pointsEarned }
-                        );
-                    }
-                } catch (e) {
-                    // Non-fatal
-                    console.warn('Team score update failed:', e);
-                }
-
                 selectedIndices = [];
                 setTimeout(() => {
                     showScreen('playerAnsweredScreen');
@@ -2458,23 +1997,6 @@
                     window.dbRef(window.db, `games/${gamePin}/players/${currentPlayer.id}`),
                     { score: newScore + pointsEarned }
                 );
-
-                // Update team score (best-effort)
-                try {
-                    const gsnap = await window.dbGet(window.dbRef(window.db, `games/${gamePin}`));
-                    const gdata = gsnap.val() || {};
-                    if (gdata.teamsEnabled && currentPlayer.teamId) {
-                        const tScoreSnap = await window.dbGet(window.dbRef(window.db, `games/${gamePin}/teams/${currentPlayer.teamId}/score`));
-                        const tScore = tScoreSnap.val() || 0;
-                        await window.dbUpdate(
-                            window.dbRef(window.db, `games/${gamePin}/teams/${currentPlayer.teamId}`),
-                            { score: tScore + pointsEarned }
-                        );
-                    }
-                } catch (e) {
-                    // Non-fatal
-                    console.warn('Team score update failed:', e);
-                }
 
                 setTimeout(() => {
                     showScreen('playerAnsweredScreen');
@@ -2525,23 +2047,6 @@
                     window.dbRef(window.db, `games/${gamePin}/players/${currentPlayer.id}`),
                     { score: newScore + pointsEarned }
                 );
-
-                // Update team score (best-effort)
-                try {
-                    const gsnap = await window.dbGet(window.dbRef(window.db, `games/${gamePin}`));
-                    const gdata = gsnap.val() || {};
-                    if (gdata.teamsEnabled && currentPlayer.teamId) {
-                        const tScoreSnap = await window.dbGet(window.dbRef(window.db, `games/${gamePin}/teams/${currentPlayer.teamId}/score`));
-                        const tScore = tScoreSnap.val() || 0;
-                        await window.dbUpdate(
-                            window.dbRef(window.db, `games/${gamePin}/teams/${currentPlayer.teamId}`),
-                            { score: tScore + pointsEarned }
-                        );
-                    }
-                } catch (e) {
-                    // Non-fatal
-                    console.warn('Team score update failed:', e);
-                }
 
                 setTimeout(() => {
                     showScreen('playerAnsweredScreen');
@@ -2638,15 +2143,6 @@
                     `;
                 }).join('');
 
-
-                // Team scores (if enabled)
-                try {
-                    const gameSnap = await window.dbGet(window.dbRef(window.db, `games/${gamePin}`));
-                    renderTeamLeaderboards(gameSnap.val() || {});
-                } catch (e) {
-                    console.warn('Could not render team leaderboard:', e);
-                }
-
                 showScreen('resultsScreen');
             } catch (error) {
                 console.error('Error showing results:', error);
@@ -2711,15 +2207,6 @@
                         </div>
                     `;
                 }).join('');
-
-
-                // Team leaderboard (if enabled)
-                try {
-                    const gameSnap = await window.dbGet(window.dbRef(window.db, `games/${gamePin}`));
-                    renderTeamLeaderboards(gameSnap.val() || {});
-                } catch (e) {
-                    console.warn('Could not render team leaderboard:', e);
-                }
 
                 showScreen('finalResultsScreen');
                 createConfetti();
