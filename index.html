@@ -828,6 +828,182 @@
             transform: scale(1.1);
         }
 
+        /* COINS & STREAK SYSTEM */
+        .coin-display {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            background: var(--orange-gold);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 999;
+            display: none;
+        }
+
+        .streak-display {
+            position: fixed;
+            top: 150px;
+            right: 20px;
+            background: var(--orange-bright);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 999;
+            display: none;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes coinFloat {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -100px) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -150px) scale(1); opacity: 0; }
+        }
+
+        /* TEAM SYSTEM */
+        .team-setup {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: rgba(255,255,255,0.5);
+            border-radius: 20px;
+            border: 3px solid var(--blue-electric);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .team-box {
+            padding: 1.5rem;
+            border-radius: 20px;
+            color: white;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.2);
+            border: 4px solid rgba(255,255,255,0.3);
+        }
+
+        .team-box h4 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .team-member-badge {
+            background: rgba(255,255,255,0.25);
+            padding: 0.5rem 0.75rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .team-select-btn {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.3);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: auto;
+            transition: all 0.3s ease;
+        }
+
+        .team-select-btn:hover {
+            background: rgba(255,255,255,0.5);
+            transform: scale(1.05);
+        }
+
+        /* POWER-UP SHOP */
+        .powerup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .powerup-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 4px solid var(--blue-electric);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .powerup-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .powerup-card.active {
+            border-color: var(--orange-gold);
+            background: linear-gradient(135deg, rgba(255,158,1,0.1), rgba(255,158,1,0.2));
+        }
+
+        .powerup-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .powerup-card h3 {
+            color: var(--blue-electric);
+            margin-bottom: 0.5rem;
+        }
+
+        .powerup-cost {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--orange-gold);
+            margin-top: 1rem;
+        }
+
+        /* STATS DISPLAY */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            padding: 2rem;
+            background: var(--blue-sky);
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
         @media (max-width: 768px) {
             body { padding-top: 70px; }
             .logo-text { font-size: 1.2rem; }
@@ -940,6 +1116,29 @@
                     <p style="font-size: 1.5rem; color: #666;">Game PIN:</p>
                     <div class="pin-display" id="gamePinDisplay">000000</div>
                 </div>
+
+                <!-- Team Mode Toggle -->
+                <div style="text-align: center; margin: 2rem 0;">
+                    <label style="display: inline-flex; align-items: center; gap: 1rem; cursor: pointer; font-size: 1.2rem;">
+                        <input type="checkbox" id="enableTeams" onchange="toggleTeams()" style="width: 24px; height: 24px; cursor: pointer;">
+                        <span style="font-weight: 700; color: var(--blue-electric);">⚡ Enable Team Mode</span>
+                    </label>
+                </div>
+
+                <!-- Team Setup -->
+                <div class="team-setup" id="teamSetup" style="display: none;">
+                    <h3 style="color: var(--blue-electric); margin-bottom: 1rem;">Create Teams</h3>
+                    <div class="input-group">
+                        <label>Number of Teams</label>
+                        <select id="teamCount" onchange="createTeams()" style="cursor: pointer;">
+                            <option value="2">2 Teams</option>
+                            <option value="3">3 Teams</option>
+                            <option value="4">4 Teams</option>
+                        </select>
+                    </div>
+                    <div class="team-grid" id="teamGridHost"></div>
+                </div>
+
                 <div class="players-waiting">
                     <h3 style="color: white; text-align: center; margin-bottom: 1rem;">Players Waiting</h3>
                     <div class="player-grid" id="playersGrid"></div>
@@ -1040,11 +1239,79 @@
                 <h2>🏆 Final Results</h2>
                 <div class="leaderboard" id="finalLeaderboard"></div>
                 <div class="btn-group">
-                    <button class="btn btn-primary" onclick="goHome()">New Game</button>
+                    <button class="btn btn-primary" onclick="showGameStats()">View Stats</button>
+                    <button class="btn btn-secondary" onclick="goHome()">New Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Selection Screen (Player) -->
+        <div id="teamSelectScreen" class="screen">
+            <div class="card">
+                <h2>🏆 Choose Your Team!</h2>
+                <p style="text-align: center; font-size: 1.2rem; margin-bottom: 2rem; color: #666;">
+                    Select which team you want to join
+                </p>
+                <div class="team-grid" id="playerTeamGrid"></div>
+            </div>
+        </div>
+
+        <!-- Power-Up Shop Screen -->
+        <div id="powerUpShop" class="screen">
+            <div class="card">
+                <h2>⚡ Power-Up Shop</h2>
+                <p style="text-align: center; font-size: 1.8rem; margin-bottom: 2rem;">
+                    Your Coins: <span id="playerCoinsDisplay" style="color: var(--orange-gold); font-weight: 700;">0</span> 🪙
+                </p>
+                <div class="powerup-grid">
+                    <div class="powerup-card" onclick="buyPowerUp('doublePoints', 100)">
+                        <div class="powerup-icon">⚡</div>
+                        <h3>Double Points</h3>
+                        <p>Next correct answer worth 2x</p>
+                        <div class="powerup-cost">100 🪙</div>
+                    </div>
+                    <div class="powerup-card" onclick="buyPowerUp('timeFreeze', 150)">
+                        <div class="powerup-icon">⏱️</div>
+                        <h3>Time Freeze</h3>
+                        <p>+10 seconds on timer</p>
+                        <div class="powerup-cost">150 🪙</div>
+                    </div>
+                    <div class="powerup-card" onclick="buyPowerUp('fiftyFifty', 200)">
+                        <div class="powerup-icon">✂️</div>
+                        <h3>50/50</h3>
+                        <p>Remove 2 wrong answers</p>
+                        <div class="powerup-cost">200 🪙</div>
+                    </div>
+                    <div class="powerup-card" onclick="buyPowerUp('teamBoost', 300)">
+                        <div class="powerup-icon">🚀</div>
+                        <h3>Team Boost</h3>
+                        <p>Team gets +50 points</p>
+                        <div class="powerup-cost">300 🪙</div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="closePowerUpShop()">Back to Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Stats Screen -->
+        <div id="statsScreen" class="screen">
+            <div class="card">
+                <h2>📊 Game Statistics</h2>
+                <div class="stats-grid" id="statsGrid"></div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="goHome()">Home</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Coin Display (Fixed) -->
+    <div class="coin-display" id="coinDisplay">0 🪙</div>
+    
+    <!-- Streak Display (Fixed) -->
+    <div class="streak-display" id="streakDisplay">🔥 0 Streak</div>
 
     <!-- Audio elements for sound effects -->
     <audio id="correctSound" preload="auto">
@@ -1112,6 +1379,208 @@
             playSound('tickSound'); // Confirmation sound
         }
 
+        // COINS SYSTEM
+        function getPlayerCoins(playerName) {
+            const saved = localStorage.getItem(`player_${playerName}_coins`);
+            return saved ? parseInt(saved) : 0;
+        }
+
+        function awardCoins(playerName, amount) {
+            const current = getPlayerCoins(playerName);
+            localStorage.setItem(`player_${playerName}_coins`, current + amount);
+            coinsEarnedThisGame += amount;
+            updateCoinDisplay();
+        }
+
+        function updateCoinDisplay() {
+            const display = document.getElementById('coinDisplay');
+            if (currentPlayer) {
+                display.textContent = `${getPlayerCoins(currentPlayer.name)} 🪙`;
+                display.style.display = 'block';
+            }
+        }
+
+        function showCoinAnimation(amount) {
+            playSound('correctSound');
+            const coin = document.createElement('div');
+            coin.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                font-size: 3rem; font-weight: 700; color: var(--orange-gold);
+                animation: coinFloat 1.5s ease forwards; z-index: 9999; pointer-events: none;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            `;
+            coin.textContent = `+${amount} 🪙`;
+            document.body.appendChild(coin);
+            setTimeout(() => coin.remove(), 1500);
+        }
+
+        // STREAK SYSTEM
+        function updateStreakDisplay() {
+            const display = document.getElementById('streakDisplay');
+            if (currentStreak >= 3) {
+                display.textContent = `🔥 ${currentStreak} Streak!`;
+                display.style.display = 'block';
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
+        function checkStreakBonus() {
+            let bonus = 0;
+            let message = '';
+            
+            if (currentStreak === 3) {
+                bonus = 50;
+                message = '🔥 3 Streak! +50 Coins!';
+            } else if (currentStreak === 5) {
+                bonus = 150;
+                message = '🔥🔥 5 STREAK! +150 Coins!';
+            } else if (currentStreak === 10) {
+                bonus = 500;
+                message = '🔥🔥🔥 10 STREAK!!! +500 Coins!';
+            }
+            
+            if (bonus > 0) {
+                awardCoins(currentPlayer.name, bonus);
+                showStreakBonus(message);
+            }
+        }
+
+        function showStreakBonus(message) {
+            const bonus = document.createElement('div');
+            bonus.style.cssText = `
+                position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%);
+                padding: 2rem 3rem; background: linear-gradient(135deg, var(--orange-bright), var(--orange-gold));
+                color: white; border-radius: 24px; font-size: 2.5rem; font-weight: 700;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 10000;
+                animation: pulse 0.5s ease 3; text-align: center;
+            `;
+            bonus.textContent = message;
+            document.body.appendChild(bonus);
+            setTimeout(() => bonus.remove(), 2000);
+        }
+
+        // TEAMS SYSTEM
+        function toggleTeams() {
+            teamsEnabled = document.getElementById('enableTeams').checked;
+            document.getElementById('teamSetup').style.display = teamsEnabled ? 'block' : 'none';
+            if (teamsEnabled) createTeams();
+        }
+
+        async function createTeams() {
+            const count = parseInt(document.getElementById('teamCount').value);
+            currentTeams = {};
+            const grid = document.getElementById('teamGridHost');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const team = teamColors[i];
+                currentTeams[team.id] = {
+                    name: team.name,
+                    color: team.color,
+                    bg: team.bg,
+                    members: [],
+                    score: 0
+                };
+                
+                grid.innerHTML += `
+                    <div class="team-box" style="background: ${team.bg};">
+                        <h4>${team.name}</h4>
+                        <div id="${team.id}-members" style="flex: 1;"></div>
+                        <p style="margin-top: auto; opacity: 0.8; font-size: 0.9rem;">Waiting for players...</p>
+                    </div>
+                `;
+            }
+            
+            if (gamePin) {
+                await window.dbUpdate(window.dbRef(window.db, `games/${gamePin}`), {
+                    teamsEnabled: teamsEnabled,
+                    teams: currentTeams
+                });
+            }
+        }
+
+        async function selectTeam(teamId) {
+            if (!currentPlayer) return;
+            
+            currentPlayer.team = teamId;
+            
+            await window.dbUpdate(
+                window.dbRef(window.db, `games/${gamePin}/players/${currentPlayer.id}`),
+                { team: teamId }
+            );
+            
+            showScreen('playerWaitingScreen');
+            document.getElementById('waitingPlayerName').textContent = currentPlayer.name;
+        }
+        window.selectTeam = selectTeam;
+
+        // POWER-UPS SYSTEM
+        function buyPowerUp(type, cost) {
+            const coins = getPlayerCoins(currentPlayer.name);
+            if (coins >= cost) {
+                localStorage.setItem(`player_${currentPlayer.name}_coins`, coins - cost);
+                activePowerUps[type] = true;
+                playSound('correctSound');
+                alert(`⚡ Power-up activated: ${type}!`);
+                updateCoinDisplay();
+                document.getElementById('playerCoinsDisplay').textContent = getPlayerCoins(currentPlayer.name);
+            } else {
+                playSound('wrongSound');
+                alert('❌ Not enough coins!');
+            }
+        }
+        window.buyPowerUp = buyPowerUp;
+
+        function openPowerUpShop() {
+            if (currentPlayer) {
+                document.getElementById('playerCoinsDisplay').textContent = getPlayerCoins(currentPlayer.name);
+                showScreen('powerUpShop');
+            }
+        }
+
+        function closePowerUpShop() {
+            showScreen('playerWaitingScreen');
+        }
+        window.closePowerUpShop = closePowerUpShop;
+
+        // STATS SYSTEM
+        function showGameStats() {
+            const accuracy = gameStats.totalAnswers > 0 
+                ? Math.round((gameStats.correctAnswers / gameStats.totalAnswers) * 100) 
+                : 0;
+            
+            const avgTime = gameStats.responseTimes.length > 0
+                ? (gameStats.responseTimes.reduce((a, b) => a + b, 0) / gameStats.responseTimes.length).toFixed(1)
+                : 0;
+            
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-value">${accuracy}%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-card" style="background: var(--blue-electric);">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-value">${avgTime}s</div>
+                    <div class="stat-label">Avg Speed</div>
+                </div>
+                <div class="stat-card" style="background: var(--orange-gold);">
+                    <div class="stat-icon">🪙</div>
+                    <div class="stat-value">${coinsEarnedThisGame}</div>
+                    <div class="stat-label">Coins Earned</div>
+                </div>
+                <div class="stat-card" style="background: var(--orange-bright);">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-value">${bestStreak}</div>
+                    <div class="stat-label">Best Streak</div>
+                </div>
+            `;
+            
+            showScreen('statsScreen');
+        }
+        window.showGameStats = showGameStats;
+
         // Create animated stars background
         function createStars() {
             const starsContainer = document.getElementById('stars');
@@ -1137,6 +1606,38 @@
         let timeLeft = 20;
         let playersListener = null;
         let gameStateListener = null;
+
+        // COINS & STREAKS SYSTEM
+        let currentStreak = 0;
+        let bestStreak = 0;
+        let startingCoins = 0;
+        let coinsEarnedThisGame = 0;
+
+        // TEAMS SYSTEM
+        let teamsEnabled = false;
+        let currentTeams = {};
+        let teamColors = [
+            {id: 'team1', name: '🔥 Fire Team', color: 'var(--orange-bright)', bg: '#ff5a00'},
+            {id: 'team2', name: '⚡ Lightning Team', color: 'var(--blue-electric)', bg: '#0d70ff'},
+            {id: 'team3', name: '⭐ Gold Team', color: 'var(--orange-gold)', bg: '#ff9e01'},
+            {id: 'team4', name: '☁️ Sky Team', color: 'var(--blue-sky)', bg: '#43ccff'}
+        ];
+
+        // POWER-UPS SYSTEM
+        let activePowerUps = {
+            doublePoints: false,
+            timeFreeze: false,
+            fiftyFifty: false,
+            teamBoost: false
+        };
+
+        // STATS TRACKING
+        let gameStats = {
+            correctAnswers: 0,
+            totalAnswers: 0,
+            avgResponseTime: 0,
+            responseTimes: []
+        };
 
         // Navigation
         function showScreen(screenId) {
@@ -1174,6 +1675,27 @@
             currentPlayer = null;
             currentQuiz = null;
             gamePin = '';
+            
+            // Reset coins/streaks/power-ups
+            document.getElementById('coinDisplay').style.display = 'none';
+            document.getElementById('streakDisplay').style.display = 'none';
+            currentStreak = 0;
+            bestStreak = 0;
+            coinsEarnedThisGame = 0;
+            teamsEnabled = false;
+            currentTeams = {};
+            activePowerUps = {
+                doublePoints: false,
+                timeFreeze: false,
+                fiftyFifty: false,
+                teamBoost: false
+            };
+            gameStats = {
+                correctAnswers: 0,
+                totalAnswers: 0,
+                avgResponseTime: 0,
+                responseTimes: []
+            };
             
             // Switch to home mode
             const logoContainer = document.getElementById('logoContainer');
@@ -1732,19 +2254,54 @@
                 }
 
                 gamePin = pin;
+                
+                // Initialize player with coins
+                startingCoins = getPlayerCoins(name);
+                coinsEarnedThisGame = 0;
+                currentStreak = 0;
+                bestStreak = 0;
+                gameStats = {
+                    correctAnswers: 0,
+                    totalAnswers: 0,
+                    avgResponseTime: 0,
+                    responseTimes: []
+                };
+                
                 currentPlayer = {
                     id: Date.now().toString(),
                     name: name,
-                    score: 0
+                    score: 0,
+                    coins: startingCoins
                 };
 
                 await window.dbSet(
                     window.dbRef(window.db, `games/${gamePin}/players/${currentPlayer.id}`),
-                    { name: currentPlayer.name, score: 0 }
+                    { name: currentPlayer.name, score: 0, coins: currentPlayer.coins }
                 );
 
-                document.getElementById('waitingPlayerName').textContent = name;
-                showScreen('playerWaitingScreen');
+                // Check if teams are enabled
+                if (gameData.teamsEnabled) {
+                    // Show team selection
+                    currentTeams = gameData.teams;
+                    const grid = document.getElementById('playerTeamGrid');
+                    grid.innerHTML = '';
+                    
+                    Object.entries(currentTeams).forEach(([teamId, team]) => {
+                        grid.innerHTML += `
+                            <div class="team-box" style="background: ${team.bg}; cursor: pointer;" onclick="selectTeam('${teamId}')">
+                                <h4>${team.name}</h4>
+                                <div class="team-select-btn">Join Team</div>
+                            </div>
+                        `;
+                    });
+                    
+                    showScreen('teamSelectScreen');
+                } else {
+                    document.getElementById('waitingPlayerName').textContent = name;
+                    showScreen('playerWaitingScreen');
+                }
+                
+                updateCoinDisplay();
                 listenToGameState();
             } catch (error) {
                 alert('Error joining game. Please try again.');
@@ -1818,10 +2375,33 @@
         function showPlayerQuestion() {
             const question = currentQuiz.questions[currentQuestionIndex];
             timeLeft = question.timeLimit;
+            
+            // Apply Time Freeze power-up
+            if (activePowerUps.timeFreeze) {
+                timeLeft += 10;
+                activePowerUps.timeFreeze = false;
+                showStreakBonus('⏱️ +10 SECONDS!');
+            }
 
             document.getElementById('playerQuestionText').textContent = question.question;
             const playerGrid = document.getElementById('playerAnswerGrid');
             playerGrid.innerHTML = renderPlayerAnswerView(question);
+            
+            // Apply 50/50 power-up (only for multiple choice)
+            if (activePowerUps.fiftyFifty && question.type === 'multiple-choice') {
+                setTimeout(() => {
+                    const buttons = document.querySelectorAll('#playerAnswerGrid .answer-btn');
+                    let wrongCount = 0;
+                    buttons.forEach((btn, idx) => {
+                        if (idx !== question.correctIndex && wrongCount < 2) {
+                            btn.style.display = 'none';
+                            wrongCount++;
+                        }
+                    });
+                    activePowerUps.fiftyFifty = false;
+                    showStreakBonus('✂️ 50/50 ACTIVATED!');
+                }, 100);
+            }
             
             showScreen('playerQuestionScreen');
             startTimer('playerTimer');
@@ -1964,10 +2544,41 @@
         async function submitAnswer(answerIndex) {
             const question = currentQuiz.questions[currentQuestionIndex];
             const isCorrect = answerIndex === question.correctIndex;
-            const pointsEarned = isCorrect ? Math.floor((timeLeft / question.timeLimit) * 1000) : 0;
+            
+            // Track stats
+            const responseTime = question.timeLimit - timeLeft;
+            gameStats.responseTimes.push(responseTime);
+            gameStats.totalAnswers++;
+            if (isCorrect) gameStats.correctAnswers++;
+            
+            // Apply Double Points power-up
+            let pointsMultiplier = 1;
+            if (activePowerUps.doublePoints) {
+                pointsMultiplier = 2;
+                activePowerUps.doublePoints = false;
+                showStreakBonus('⚡ DOUBLE POINTS!');
+            }
+            
+            const basePoints = Math.floor((timeLeft / question.timeLimit) * 1000);
+            const pointsEarned = isCorrect ? basePoints * pointsMultiplier : 0;
+
+            // Award coins and handle streaks
+            if (isCorrect) {
+                const speedBonus = Math.floor(timeLeft / 2);
+                const coinsEarned = 10 + speedBonus;
+                awardCoins(currentPlayer.name, coinsEarned);
+                showCoinAnimation(coinsEarned);
+                
+                currentStreak++;
+                if (currentStreak > bestStreak) bestStreak = currentStreak;
+                updateStreakDisplay();
+                checkStreakBonus();
+            } else {
+                currentStreak = 0;
+                updateStreakDisplay();
+            }
 
             playSound(isCorrect ? 'correctSound' : 'wrongSound');
-
             currentPlayer.score += pointsEarned;
 
             // Visual feedback
