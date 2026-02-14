@@ -29,79 +29,75 @@
             background: var(--cream);
             min-height: 100vh;
             overflow-x: hidden;
-            padding-top: 0;
+            padding-top: 90px;
         }
 
-        /* Persistent Header Bar */
+        /* Clean Header with Nav */
         .header-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 8px;
-            background: linear-gradient(90deg, var(--orange-gold), var(--orange-bright), var(--blue-electric), var(--blue-sky));
+            background: white;
+            padding: 1.25rem 0;
             z-index: 1001;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
-        /* Logo container - changes based on page */
-        .logo-container {
-            position: fixed;
-            top: 8px;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-
-        .logo-container.home-mode {
-            position: relative;
-            text-align: center;
-            padding: 3rem 0 1rem 0;
-            pointer-events: all;
-        }
-
-        .logo-container.nav-mode {
-            background: var(--blue-electric);
-            backdrop-filter: blur(10px);
-            padding: 0.5rem 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            pointer-events: all;
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .logo-link {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            justify-content: center;
             text-decoration: none;
             cursor: pointer;
             transition: transform 0.3s ease;
-            pointer-events: all;
         }
 
         .logo-link:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
 
         .logo-img {
-            max-width: 400px;
+            max-width: 220px;
             height: auto;
-            filter: drop-shadow(3px 3px 8px rgba(0,0,0,0.3));
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.08));
+        }
+
+        /* Navigation */
+        .main-nav {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--blue-electric);
+            text-decoration: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .nav-mode .logo-img {
-            max-width: 180px;
+        .nav-link:hover {
+            background: var(--blue-sky);
+            color: white;
+            transform: translateY(-2px);
         }
 
-        /* Hide old text logo elements */
-        .logo-text,
-        .logo-emoji {
-            display: none;
-        }
-
-        body.nav-page {
-            padding-top: 80px;
+        .nav-link.active {
+            background: var(--orange-bright);
+            color: white;
         }
 
         .stars {
@@ -1022,14 +1018,19 @@
     </style>
 </head>
 <body>
-    <!-- Decorative Header Bar -->
-    <div class="header-bar"></div>
-    
-    <!-- Logo Container - switches between home and nav modes -->
-    <div class="logo-container home-mode" id="logoContainer">
-        <a class="logo-link" onclick="goHome()">
-            <img src="letsgetquizzy_logo.png" alt="Let's Get Quizzy!" class="logo-img">
-        </a>
+    <!-- Header with Logo and Nav -->
+    <div class="header-bar">
+        <div class="header-content">
+            <a class="logo-link" onclick="goHome()">
+                <img src="letsgetquizzy_logo.png" alt="Let's Get Quizzy!" class="logo-img">
+            </a>
+            <nav class="main-nav">
+                <a class="nav-link" onclick="goHome()">Home</a>
+                <a class="nav-link" onclick="showScreen('createQuizScreen')">Create Quiz</a>
+                <a class="nav-link" onclick="showScreen('hostScreen')">Host Game</a>
+                <a class="nav-link" onclick="showScreen('joinScreen')">Join Game</a>
+            </nav>
+        </div>
     </div>
 
     <!-- Sound Toggle Button -->
@@ -1338,14 +1339,14 @@
 
         // TODO: Replace with your Firebase config
         const firebaseConfig = {
-            apiKey: "AIzaSyCd4pwS1gYKtMYjFychTVQqfIp7A8sMBTM",
-            authDomain: "quizcraft-e3e3c.firebaseapp.com",
-            databaseURL: "https://quizcraft-e3e3c-default-rtdb.firebaseio.com",
-            projectId: "quizcraft-e3e3c",
-            storageBucket: "quizcraft-e3e3c.firebasestorage.app",
-            messagingSenderId: "35069708047",
-            appId: "1:35069708047:web:960f19442093a567f4a07a"
-    };
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -1644,20 +1645,6 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
             
-            // Switch logo mode
-            const logoContainer = document.getElementById('logoContainer');
-            const body = document.body;
-            
-            if (screenId === 'homeScreen') {
-                logoContainer.classList.remove('nav-mode');
-                logoContainer.classList.add('home-mode');
-                body.classList.remove('nav-page');
-            } else {
-                logoContainer.classList.remove('home-mode');
-                logoContainer.classList.add('nav-mode');
-                body.classList.add('nav-page');
-            }
-            
             if (screenId === 'createQuizScreen' && document.querySelectorAll('.question-item').length === 0) {
                 addQuestion();
             }
@@ -1696,12 +1683,6 @@
                 avgResponseTime: 0,
                 responseTimes: []
             };
-            
-            // Switch to home mode
-            const logoContainer = document.getElementById('logoContainer');
-            logoContainer.classList.remove('nav-mode');
-            logoContainer.classList.add('home-mode');
-            document.body.classList.remove('nav-page');
             
             showScreen('homeScreen');
             displayRecentQuizzes();
