@@ -29,18 +29,32 @@
             background: var(--cream);
             min-height: 100vh;
             overflow-x: hidden;
-            padding-top: 90px;
+            padding-top: 0;
         }
 
-        /* Clean Header with Nav */
+        body.has-nav {
+            padding-top: 80px;
+        }
+
+        /* Slim Transparent Nav - hidden by default */
         .header-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: white;
-            padding: 1.25rem 0;
+            background: transparent;
+            padding: 0.75rem 0;
             z-index: 1001;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        body.has-nav .header-bar {
+            display: block;
+        }
+
+        .header-bar.scrolled {
+            background: white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
@@ -66,7 +80,7 @@
         }
 
         .logo-img {
-            max-width: 220px;
+            max-width: 180px;
             height: auto;
             filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.08));
         }
@@ -74,17 +88,17 @@
         /* Navigation */
         .main-nav {
             display: flex;
-            gap: 1.5rem;
+            gap: 1rem;
             align-items: center;
         }
 
         .nav-link {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: var(--blue-electric);
             text-decoration: none;
-            padding: 0.75rem 1.25rem;
-            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
             transition: all 0.3s ease;
             cursor: pointer;
         }
@@ -92,12 +106,30 @@
         .nav-link:hover {
             background: var(--blue-sky);
             color: white;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
         .nav-link.active {
             background: var(--orange-bright);
             color: white;
+        }
+
+        /* Big centered logo for homepage */
+        .home-logo {
+            text-align: center;
+            padding: 3rem 0 2rem 0;
+            display: none;
+        }
+
+        #homeScreen .home-logo {
+            display: block;
+        }
+
+        .home-logo img {
+            max-width: 500px;
+            width: 90%;
+            height: auto;
+            filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.15));
         }
 
         .stars {
@@ -210,6 +242,12 @@
             margin-bottom: 2rem;
             animation: slideDown 0.6s ease 0.1s backwards;
             font-family: 'SN Pro', sans-serif;
+            display: block;
+        }
+
+        /* Only show subtitle on home screen */
+        .screen:not(#homeScreen) .subtitle {
+            display: none !important;
         }
 
         /* Recent Quizzes Section */
@@ -368,6 +406,11 @@
         }
 
         .home-actions {
+            display: none; /* Hidden by default */
+        }
+
+        /* Only show on home screen */
+        #homeScreen .home-actions {
             display: flex;
             gap: 2rem;
             justify-content: center;
@@ -1040,6 +1083,9 @@
     <div class="container">
         <!-- Home Screen -->
         <div id="homeScreen" class="screen active">
+            <div class="home-logo">
+                <img src="letsgetquizzy_logo.png" alt="Let's Get Quizzy!">
+            </div>
             <p class="subtitle">— Get Quizzy With It —</p>
             
             <!-- Floating Action Buttons -->
@@ -1596,6 +1642,16 @@
         }
         createStars();
 
+        // Add scroll listener for nav background
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header-bar');
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
         // Game state
         let quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
         let currentQuiz = null;
@@ -1644,6 +1700,13 @@
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
+            
+            // Show/hide nav bar based on screen
+            if (screenId === 'homeScreen') {
+                document.body.classList.remove('has-nav');
+            } else {
+                document.body.classList.add('has-nav');
+            }
             
             if (screenId === 'createQuizScreen' && document.querySelectorAll('.question-item').length === 0) {
                 addQuestion();
