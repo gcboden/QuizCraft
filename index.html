@@ -26,10 +26,11 @@
 
         body {
             font-family: 'SN Pro', sans-serif;
-            background: var(--cream);
-            min-height: 100vh;
-            overflow-x: hidden;
-            padding-top: 0;
+            background-image: url('AdobeStock_634478978_simpleBlueBG.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
         }
 
         body.has-nav {
@@ -93,13 +94,14 @@
         }
 
         .nav-link {
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            color: var(--blue-electric);
+            color: var(--orange-bright);
             text-decoration: none;
             padding: 0.5rem 1rem;
             border-radius: 8px;
             transition: all 0.3s ease;
+            text-transform: uppercase;
             cursor: pointer;
         }
 
@@ -236,7 +238,7 @@
 
         .subtitle {
             text-align: center;
-            color: var(--dark);
+            color: #032642;
             font-size: 1.8rem;
             font-weight: 700;
             margin-bottom: 2rem;
@@ -400,7 +402,7 @@
         .btn-group {
             display: flex;
             gap: 1.5rem;
-            justify-content: center;
+            justify-content: flex-start;
             flex-wrap: wrap;
             margin-top: 2rem;
         }
@@ -1126,7 +1128,7 @@
         <!-- Create Quiz Screen -->
         <div id="createQuizScreen" class="screen">
             <div class="card quiz-creator">
-                <h2>📝 Create Your Quiz</h2>
+                <h2><img src="createQuiz.png" style="width: 40px; height: 40px; vertical-align: middle; margin-right: 10px;">Create Your Quiz</h2>
                 <div class="input-group">
                     <label>Quiz Title</label>
                     <input type="text" id="quizTitle" placeholder="Enter quiz title...">
@@ -1143,14 +1145,13 @@
         <!-- Host Screen -->
         <div id="hostScreen" class="screen">
             <div class="card">
-                <h2>🎮 Host a Game</h2>
+                <h2><img src="hostGame.png" style="width: 40px; height: 40px; vertical-align: middle; margin-right: 10px;">Host a Game</h2>
                 <div class="input-group">
                     <label>Select Quiz</label>
                     <select id="quizSelect"></select>
                 </div>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="startHosting()">Start Hosting</button>
-                    <button class="btn btn-secondary" onclick="goHome()">Back</button>
                 </div>
             </div>
         </div>
@@ -1158,7 +1159,7 @@
         <!-- Lobby Screen (Host) -->
         <div id="lobbyScreen" class="screen">
             <div class="card">
-                <h2>🎪 Game Lobby</h2>
+                <h2><img src="lobbyScreen.png" style="width: 40px; height: 40px; vertical-align: middle; margin-right: 10px;">Game Lobby</h2>
                 <div class="game-pin">
                     <p style="font-size: 1.5rem; color: #666;">Game PIN:</p>
                     <div class="pin-display" id="gamePinDisplay">000000</div>
@@ -1200,7 +1201,7 @@
         <!-- Join Screen -->
         <div id="joinScreen" class="screen">
             <div class="card">
-                <h2>🚀 Join Game</h2>
+                <h2><img src="joinGame.png" style="width: 40px; height: 40px; vertical-align: middle; margin-right: 10px;">Join Game</h2>
                 <div class="input-group">
                     <label>Game PIN</label>
                     <input type="text" id="gamePinInput" placeholder="Enter game PIN..." maxlength="6">
@@ -1211,7 +1212,6 @@
                 </div>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="joinGame()">Join</button>
-                    <button class="btn btn-secondary" onclick="goHome()">Back</button>
                 </div>
             </div>
         </div>
@@ -1315,7 +1315,7 @@
                         <div class="powerup-icon">⚡</div>
                         <h3>Double Points</h3>
                         <p>Next correct answer worth 2x</p>
-                        <div class="powerup-cost">100 🪙</div>
+                        <div class="powerup-cost">100 <img src="coinMoney.png" style="width: 20px; height: 20px; vertical-align: middle;"></div>
                     </div>
                     <div class="powerup-card" onclick="buyPowerUp('timeFreeze', 150)">
                         <div class="powerup-icon">⏱️</div>
@@ -1442,7 +1442,7 @@
         function updateCoinDisplay() {
             const display = document.getElementById('coinDisplay');
             if (currentPlayer) {
-                display.textContent = `${getPlayerCoins(currentPlayer.name)} 🪙`;
+                display.innerHTML = `${getPlayerCoins(currentPlayer.name)} <img src="coinMoney.png" style="width: 24px; height: 24px; vertical-align: middle;">`;
                 display.style.display = 'block';
             }
         }
@@ -1456,7 +1456,7 @@
                 animation: coinFloat 1.5s ease forwards; z-index: 9999; pointer-events: none;
                 text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             `;
-            coin.textContent = `+${amount} 🪙`;
+            coin.innerHTML = `+${amount} <img src="coinMoney.png" style="width: 32px; height: 32px; vertical-align: middle;">`;
             document.body.appendChild(coin);
             setTimeout(() => coin.remove(), 1500);
         }
