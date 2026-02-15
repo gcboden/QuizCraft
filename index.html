@@ -1094,6 +1094,7 @@
             <div class="home-actions">
                 <button class="btn btn-primary" onclick="showScreen('createQuizScreen')">Create Quiz</button>
                 <button class="btn btn-secondary" onclick="showScreen('hostScreen')">Host Game</button>
+                <button class="btn" style="background: var(--orange-gold); color: white;" onclick="startTeamHosting()">Host Team Game</button>
                 <button class="btn btn-success" onclick="showScreen('joinScreen')">Join Game</button>
             </div>
 
@@ -1534,7 +1535,12 @@
                 
                 grid.innerHTML += `
                     <div class="team-box" style="background: ${team.bg};">
-                        <h4>${team.name}</h4>
+                        <input type="text" 
+                               id="teamName${i}" 
+                               value="${team.name}" 
+                               onchange="updateTeamName('${team.id}', this.value)"
+                               style="width: 100%; padding: 0.5rem; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; background: rgba(255,255,255,0.2); color: white; font-weight: 700; font-size: 1.2rem; text-align: center; margin-bottom: 0.75rem;"
+                               placeholder="Enter team name...">
                         <div id="${team.id}-members" style="flex: 1;"></div>
                         <p style="margin-top: auto; opacity: 0.8; font-size: 0.9rem;">Waiting for players...</p>
                     </div>
@@ -1548,6 +1554,19 @@
                 });
             }
         }
+
+        function updateTeamName(teamId, newName) {
+            if (currentTeams[teamId]) {
+                currentTeams[teamId].name = newName || currentTeams[teamId].name;
+                
+                if (gamePin) {
+                    window.dbUpdate(window.dbRef(window.db, `games/${gamePin}/teams/${teamId}`), {
+                        name: newName
+                    });
+                }
+            }
+        }
+        window.updateTeamName = updateTeamName;
 
         async function selectTeam(teamId) {
             if (!currentPlayer) return;
@@ -2233,6 +2252,36 @@
             await startHostingQuiz();
         }
         window.startHosting = startHosting;
+
+        async function startTeamHosting() {
+            playSound('joinSound');
+            showScreen('hostScreen');
+            
+            // Wait a moment for screen to render
+            setTimeout(() => {
+                const quizSelect = document.getElementById('quizSelect');
+                if (quizSelect && quizSelect.options.length > 0) {
+                    // Auto-select first quiz if available
+                    quizSelect.selectedIndex = 0;
+                    currentQuiz = quizzes.find(q => q.id == quizSelect.value);
+                    
+                    if (currentQuiz) {
+                        startHostingQuiz().then(() => {
+                            // Auto-enable teams
+                            document.getElementById('enableTeams').checked = true;
+                            toggleTeams();
+                        });
+                    } else {
+                        alert('Please create a quiz first!');
+                        showScreen('createQuizScreen');
+                    }
+                } else {
+                    alert('Please create a quiz first!');
+                    showScreen('createQuizScreen');
+                }
+            }, 100);
+        }
+        window.startTeamHosting = startTeamHosting;
 
         function listenToPlayers() {
             const playersRef = window.dbRef(window.db, `games/${gamePin}/players`);
