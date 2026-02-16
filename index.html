@@ -1094,7 +1094,6 @@
             <div class="home-actions">
                 <button class="btn btn-primary" onclick="showScreen('createQuizScreen')">Create Quiz</button>
                 <button class="btn btn-secondary" onclick="showScreen('hostScreen')">Host Game</button>
-                <button class="btn" style="background: var(--orange-gold); color: white;" onclick="startTeamHosting()">Host Team Game</button>
                 <button class="btn btn-success" onclick="showScreen('joinScreen')">Join Game</button>
             </div>
 
@@ -1168,12 +1167,26 @@
                     <div class="pin-display" id="gamePinDisplay">000000</div>
                 </div>
 
-                <!-- Team Mode Toggle -->
+                <!-- Team Mode Toggle Button -->
                 <div style="text-align: center; margin: 2rem 0;">
-                    <label style="display: inline-flex; align-items: center; gap: 1rem; cursor: pointer; font-size: 1.2rem;">
-                        <input type="checkbox" id="enableTeams" onchange="toggleTeams()" style="width: 24px; height: 24px; cursor: pointer;">
-                        <span style="font-weight: 700; color: var(--blue-electric);">⚡ Enable Team Mode</span>
-                    </label>
+                    <button id="teamModeBtn" onclick="toggleTeamMode()" style="
+                        background: linear-gradient(90deg, var(--orange-gold), var(--orange-bright), var(--blue-electric), var(--blue-sky));
+                        border: none;
+                        color: white;
+                        font-size: 1.3rem;
+                        font-weight: 700;
+                        padding: 1rem 2.5rem;
+                        border-radius: 50px;
+                        cursor: pointer;
+                        box-shadow: 0 6px 0 rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.2);
+                        transition: all 0.3s ease;
+                        font-family: 'SN Pro', sans-serif;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                    " onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 0 rgba(0,0,0,0.15), 0 15px 30px rgba(0,0,0,0.25)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 0 rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.2)'">
+                        ✨ Activate Team Mode ✨
+                    </button>
+                    <input type="checkbox" id="enableTeams" style="display: none;">
                 </div>
 
                 <!-- Team Setup -->
@@ -1511,6 +1524,28 @@
         }
 
         // TEAMS SYSTEM
+        function toggleTeamMode() {
+            const checkbox = document.getElementById('enableTeams');
+            const button = document.getElementById('teamModeBtn');
+            
+            // Toggle state
+            checkbox.checked = !checkbox.checked;
+            teamsEnabled = checkbox.checked;
+            
+            // Update button appearance
+            if (teamsEnabled) {
+                button.textContent = '🔥 Team Mode Active! 🔥';
+                button.style.background = 'linear-gradient(90deg, #2ecc71, #27ae60)';
+            } else {
+                button.textContent = '✨ Activate Team Mode ✨';
+                button.style.background = 'linear-gradient(90deg, var(--orange-gold), var(--orange-bright), var(--blue-electric), var(--blue-sky))';
+            }
+            
+            // Show/hide team setup
+            toggleTeams();
+        }
+        window.toggleTeamMode = toggleTeamMode;
+
         function toggleTeams() {
             teamsEnabled = document.getElementById('enableTeams').checked;
             document.getElementById('teamSetup').style.display = teamsEnabled ? 'block' : 'none';
@@ -2011,6 +2046,16 @@
 
                 document.getElementById('gamePinDisplay').textContent = gamePin;
                 showScreen('lobbyScreen');
+                
+                // Auto-enable teams if flag is set
+                if (window.autoEnableTeams) {
+                    setTimeout(() => {
+                        document.getElementById('enableTeams').checked = true;
+                        toggleTeams();
+                        window.autoEnableTeams = false; // Reset flag
+                    }, 100);
+                }
+                
                 listenToPlayers();
             } catch (error) {
                 alert('Error creating game. Please check your Firebase configuration.');
@@ -2255,31 +2300,8 @@
 
         async function startTeamHosting() {
             playSound('joinSound');
+            window.autoEnableTeams = true; // Flag to auto-enable teams
             showScreen('hostScreen');
-            
-            // Wait a moment for screen to render
-            setTimeout(() => {
-                const quizSelect = document.getElementById('quizSelect');
-                if (quizSelect && quizSelect.options.length > 0) {
-                    // Auto-select first quiz if available
-                    quizSelect.selectedIndex = 0;
-                    currentQuiz = quizzes.find(q => q.id == quizSelect.value);
-                    
-                    if (currentQuiz) {
-                        startHostingQuiz().then(() => {
-                            // Auto-enable teams
-                            document.getElementById('enableTeams').checked = true;
-                            toggleTeams();
-                        });
-                    } else {
-                        alert('Please create a quiz first!');
-                        showScreen('createQuizScreen');
-                    }
-                } else {
-                    alert('Please create a quiz first!');
-                    showScreen('createQuizScreen');
-                }
-            }, 100);
         }
         window.startTeamHosting = startTeamHosting;
 
