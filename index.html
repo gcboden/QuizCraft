@@ -1360,6 +1360,16 @@
                 <p style="text-align: center; font-size: 1.2rem; color: #666;">
                     Get ready, <span id="waitingPlayerName" style="color: var(--primary); font-weight: 700;"></span>!
                 </p>
+                
+                <!-- Shop Button -->
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn" style="background: linear-gradient(90deg, var(--orange-gold), var(--orange-bright), var(--blue-electric), var(--blue-sky)); color: white;" onclick="openPowerUpShop()">
+                        ⚡ Power-Up Shop ⚡
+                    </button>
+                    <p style="margin-top: 1rem; color: #666; font-size: 0.95rem;">
+                        Your Coins: <span id="waitingCoinsDisplay" style="color: var(--orange-gold); font-weight: 700; font-size: 1.2rem;">0</span> 🪙
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -1739,28 +1749,106 @@
         function buyPowerUp(type, cost) {
             const coins = getPlayerCoins(currentPlayer.name);
             if (coins >= cost) {
+                // Check if already owned
+                if (activePowerUps[type]) {
+                    alert('⚠️ You already have this power-up!');
+                    return;
+                }
+                
+                // Purchase power-up
                 localStorage.setItem(`player_${currentPlayer.name}_coins`, coins - cost);
                 activePowerUps[type] = true;
                 playSound('correctSound');
-                alert(`⚡ Power-up activated: ${type}!`);
+                
+                // Show purchase confirmation
+                showPowerUpPurchased(type);
+                
+                // Update displays
                 updateCoinDisplay();
                 document.getElementById('playerCoinsDisplay').textContent = getPlayerCoins(currentPlayer.name);
+                document.getElementById('waitingCoinsDisplay').textContent = getPlayerCoins(currentPlayer.name);
+                
+                // Mark card as purchased
+                event.target.closest('.powerup-card').classList.add('active');
+                event.target.closest('.powerup-card').style.opacity = '0.6';
+                event.target.closest('.powerup-card').style.pointerEvents = 'none';
             } else {
                 playSound('wrongSound');
-                alert('❌ Not enough coins!');
+                showNotification('❌ Not enough coins!', 'error');
             }
         }
         window.buyPowerUp = buyPowerUp;
+
+        function showPowerUpPurchased(type) {
+            const names = {
+                doublePoints: 'Double Points',
+                timeFreeze: 'Time Freeze',
+                fiftyFifty: '50/50',
+                teamBoost: 'Team Boost'
+            };
+            
+            const msg = document.createElement('div');
+            msg.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                padding: 2rem 3rem; background: linear-gradient(135deg, var(--blue-electric), var(--blue-sky));
+                color: white; border-radius: 24px; font-size: 1.8rem; font-weight: 700;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 10000;
+                animation: pulse 0.5s ease 2; text-align: center;
+            `;
+            msg.innerHTML = `⚡ ${names[type]} Activated! ⚡`;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 1500);
+        }
+
+        function showNotification(message, type) {
+            const msg = document.createElement('div');
+            const bgColor = type === 'error' ? 'var(--orange-bright)' : 'var(--blue-electric)';
+            msg.style.cssText = `
+                position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+                padding: 1rem 2rem; background: ${bgColor};
+                color: white; border-radius: 12px; font-size: 1.2rem; font-weight: 600;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10000;
+                animation: slideDown 0.3s ease;
+            `;
+            msg.textContent = message;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 2000);
+        }
 
         function openPowerUpShop() {
             if (currentPlayer) {
                 document.getElementById('playerCoinsDisplay').textContent = getPlayerCoins(currentPlayer.name);
                 showScreen('powerUpShop');
+                
+                // Reset all power-up cards visual state
+                document.querySelectorAll('.powerup-card').forEach(card => {
+                    card.classList.remove('active');
+                    card.style.opacity = '1';
+                    card.style.pointerEvents = 'auto';
+                });
+                
+                // Mark purchased power-ups
+                Object.keys(activePowerUps).forEach(type => {
+                    if (activePowerUps[type]) {
+                        const cards = document.querySelectorAll('.powerup-card');
+                        const index = ['doublePoints', 'timeFreeze', 'fiftyFifty', 'teamBoost'].indexOf(type);
+                        if (cards[index]) {
+                            cards[index].classList.add('active');
+                            cards[index].style.opacity = '0.6';
+                            cards[index].style.pointerEvents = 'none';
+                        }
+                    }
+                });
             }
         }
+        window.openPowerUpShop = openPowerUpShop;
 
         function closePowerUpShop() {
             showScreen('playerWaitingScreen');
+            // Update waiting coins display
+            if (currentPlayer) {
+                document.getElementById('waitingCoinsDisplay').textContent = getPlayerCoins(currentPlayer.name);
+            }
         }
         window.closePowerUpShop = closePowerUpShop;
 
@@ -2555,6 +2643,7 @@
                     showScreen('teamSelectScreen');
                 } else {
                     document.getElementById('waitingPlayerName').textContent = name;
+                    document.getElementById('waitingCoinsDisplay').textContent = getPlayerCoins(name);
                     showScreen('playerWaitingScreen');
                 }
                 
