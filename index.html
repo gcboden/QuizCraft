@@ -1045,13 +1045,122 @@
             opacity: 0.95;
         }
 
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 8px;
+            z-index: 1002;
+        }
+
+        .hamburger span {
+            width: 28px;
+            height: 3px;
+            background: var(--blue-electric);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1001;
+        }
+
+        .mobile-menu-overlay.active {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             body { padding-top: 70px; }
+            
+            body.has-nav {
+                padding-top: 70px;
+            }
+            
+            /* Push logo up on mobile homepage */
+            .home-logo {
+                padding: 1rem 0 1rem 0 !important;
+            }
+            
+            .home-logo img {
+                max-width: 85% !important;
+            }
+            
+            .subtitle {
+                font-size: 1.3rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            
+            /* Hamburger menu on mobile */
+            .hamburger {
+                display: flex;
+            }
+            
+            .main-nav {
+                position: fixed;
+                top: 60px;
+                right: -100%;
+                width: 250px;
+                height: calc(100vh - 60px);
+                background: white;
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 2rem 1.5rem;
+                box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+                transition: right 0.3s ease;
+                z-index: 1002;
+                gap: 0;
+            }
+            
+            .main-nav.active {
+                right: 0;
+            }
+            
+            .nav-link {
+                width: 100%;
+                text-align: left;
+                padding: 1rem;
+                border-radius: 8px;
+                margin-bottom: 0.5rem;
+            }
+            
+            .logo-img {
+                max-width: 140px !important;
+            }
+            
             .logo-text { font-size: 1.2rem; }
             .logo-emoji { font-size: 1.5rem; }
             h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.8rem; }
             .answer-grid { grid-template-columns: 1fr; }
-            .card { padding: 2rem; }
+            .card { padding: 1.5rem; }
+            .btn { 
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+            }
+            .home-actions .btn {
+                min-width: 160px;
+            }
             .sound-toggle {
                 bottom: 1rem;
                 right: 1rem;
@@ -1069,14 +1178,22 @@
             <a class="logo-link" onclick="goHome()">
                 <img src="letsgetquizzy_logo.png" alt="Let's Get Quizzy!" class="logo-img">
             </a>
-            <nav class="main-nav">
-                <a class="nav-link" onclick="goHome()">Home</a>
-                <a class="nav-link" onclick="showScreen('createQuizScreen')">Create Quiz</a>
-                <a class="nav-link" onclick="showScreen('hostScreen')">Host Game</a>
-                <a class="nav-link" onclick="showScreen('joinScreen')">Join Game</a>
+            <div class="hamburger" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <nav class="main-nav" id="mobileNav">
+                <a class="nav-link" onclick="goHome(); closeMobileMenu();">Home</a>
+                <a class="nav-link" onclick="showScreen('createQuizScreen'); closeMobileMenu();">Create Quiz</a>
+                <a class="nav-link" onclick="showScreen('hostScreen'); closeMobileMenu();">Host Game</a>
+                <a class="nav-link" onclick="showScreen('joinScreen'); closeMobileMenu();">Join Game</a>
             </nav>
         </div>
     </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
 
     <!-- Sound Toggle Button -->
     <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</button>
@@ -1707,6 +1824,29 @@
                 header.classList.remove('scrolled');
             }
         });
+
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            const nav = document.getElementById('mobileNav');
+            const overlay = document.getElementById('mobileOverlay');
+            const hamburger = document.querySelector('.hamburger');
+            
+            nav.classList.toggle('active');
+            overlay.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const nav = document.getElementById('mobileNav');
+            const overlay = document.getElementById('mobileOverlay');
+            const hamburger = document.querySelector('.hamburger');
+            
+            nav.classList.remove('active');
+            overlay.classList.remove('active');
+            hamburger.classList.remove('active');
+        }
+        window.toggleMobileMenu = toggleMobileMenu;
+        window.closeMobileMenu = closeMobileMenu;
 
         // Game state
         let quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
