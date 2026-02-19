@@ -1317,6 +1317,20 @@
                             <option value="4">4 Teams</option>
                         </select>
                     </div>
+                    
+                    <!-- Unassigned Players -->
+                    <div id="unassignedSection" style="margin: 1.5rem 0; padding: 1rem; background: rgba(0,0,0,0.05); border-radius: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="color: #666; margin: 0;">Unassigned Players</h4>
+                            <button onclick="autoAssignPlayers()" style="padding: 0.5rem 1rem; background: var(--blue-sky); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                                🎲 Auto-Assign
+                            </button>
+                        </div>
+                        <div id="unassignedPlayers" style="display: flex; flex-wrap: wrap; gap: 0.5rem; min-height: 50px;">
+                            <p style="color: #999; font-style: italic;">No players yet...</p>
+                        </div>
+                    </div>
+                    
                     <div class="team-grid" id="teamGridHost"></div>
                 </div>
 
@@ -1385,6 +1399,87 @@
                     <p style="font-size: 1.2rem; color: #666;">
                         <span id="answeredCount">0</span> / <span id="totalPlayers">0</span> players answered
                     </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Betting Screen (Player) -->
+        <div id="bettingScreen" class="screen">
+            <div class="card">
+                <h2>🎲 Place Your Bet!</h2>
+                <p style="text-align: center; font-size: 1.3rem; color: #666; margin-bottom: 2rem;">
+                    How confident are you?
+                </p>
+                
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <p style="font-size: 1.1rem; color: #666;">Your Coins</p>
+                    <p style="font-size: 2.5rem; font-weight: 700; color: var(--orange-gold);" id="bettingCoinsDisplay">0 🪙</p>
+                </div>
+
+                <div style="max-width: 500px; margin: 0 auto 2rem;">
+                    <label style="display: block; text-align: center; font-size: 1.3rem; font-weight: 700; color: var(--blue-electric); margin-bottom: 1rem;">
+                        Bet Amount: <span id="betAmountDisplay" style="color: var(--orange-bright);">100</span> 🪙
+                    </label>
+                    <input type="range" id="betSlider" min="0" max="500" step="100" value="100" 
+                           oninput="updateBetDisplay(this.value)"
+                           style="width: 100%; height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--orange-gold), var(--orange-bright), var(--blue-electric), var(--blue-sky)); outline: none; cursor: pointer;">
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.9rem; color: #999;">
+                        <span>Skip (0)</span>
+                        <span>Safe (100)</span>
+                        <span>Medium (300)</span>
+                        <span>ALL IN (500)</span>
+                    </div>
+                </div>
+
+                <div style="text-align: center;">
+                    <button class="btn btn-success" onclick="placeBet()" style="font-size: 1.5rem; padding: 1.5rem 3rem;">
+                        🎯 Lock In Bet!
+                    </button>
+                    <p style="margin-top: 1rem; font-size: 0.95rem; color: #666;">
+                        Win: +<span id="winAmount">100</span> coins | Lose: -<span id="loseAmount">100</span> coins
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Betting Screen (Player) -->
+        <div id="bettingScreen" class="screen">
+            <div class="card">
+                <h2>💰 Place Your Bet!</h2>
+                <p style="text-align: center; font-size: 1.2rem; margin: 1rem 0; color: #666;">
+                    How confident are you?
+                </p>
+                <p style="text-align: center; font-size: 1.5rem; margin-bottom: 2rem;">
+                    Your Coins: <span id="bettingCoinsDisplay" style="color: var(--orange-gold); font-weight: 700;">0</span> 🪙
+                </p>
+                
+                <div style="max-width: 500px; margin: 0 auto;">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="font-size: 3rem; font-weight: 700; color: var(--blue-electric); margin-bottom: 1rem;">
+                            <span id="betAmount">100</span> 🪙
+                        </div>
+                        <input type="range" id="betSlider" min="100" max="500" step="50" value="100" 
+                               oninput="updateBetAmount(this.value)"
+                               style="width: 100%; height: 12px; cursor: pointer; accent-color: var(--blue-electric);">
+                        <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; color: #666; font-size: 0.9rem;">
+                            <span>100</span>
+                            <span>500</span>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(13, 112, 255, 0.1); padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem;">
+                        <p style="text-align: center; color: var(--blue-electric); font-weight: 600; margin-bottom: 0.5rem;">
+                            ✅ Win: <span id="potentialWin" style="font-size: 1.3rem; font-weight: 700;">+100</span> 🪙
+                        </p>
+                        <p style="text-align: center; color: var(--orange-bright); font-weight: 600;">
+                            ❌ Lose: <span id="potentialLoss" style="font-size: 1.3rem; font-weight: 700;">-100</span> 🪙
+                        </p>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="confirmBet()" style="width: 100%; font-size: 1.5rem; padding: 1.5rem;">
+                        Lock In Bet 🎲
+                    </button>
                 </div>
             </div>
         </div>
@@ -1615,6 +1710,57 @@
             }
         }
 
+        // BETTING SYSTEM
+        function updateBetAmount(value) {
+            currentBet = parseInt(value);
+            document.getElementById('betAmount').textContent = currentBet;
+            document.getElementById('potentialWin').textContent = `+${currentBet}`;
+            document.getElementById('potentialLoss').textContent = `-${currentBet}`;
+        }
+        window.updateBetAmount = updateBetAmount;
+
+        function showBettingScreen() {
+            const playerCoins = getPlayerCoins(currentPlayer.name);
+            document.getElementById('bettingCoinsDisplay').textContent = playerCoins;
+            
+            // Set max bet to player's coins or 500, whichever is lower
+            const maxBet = Math.min(playerCoins, 500);
+            document.getElementById('betSlider').max = maxBet;
+            
+            // Set default bet to 100 or max if player has less
+            currentBet = Math.min(100, maxBet);
+            document.getElementById('betSlider').value = currentBet;
+            updateBetAmount(currentBet);
+            
+            showScreen('bettingScreen');
+        }
+
+        function confirmBet() {
+            playSound('tickSound');
+            showPlayerQuestion();
+        }
+        window.confirmBet = confirmBet;
+
+        function showBettingResult(won, amount) {
+            const msg = document.createElement('div');
+            const bgColor = won ? 'linear-gradient(135deg, #2ecc71, #27ae60)' : 'linear-gradient(135deg, var(--orange-bright), #c0392b)';
+            const text = won ? `🎉 BET WON! +${amount} 🪙` : `💸 BET LOST! -${amount} 🪙`;
+            
+            msg.style.cssText = `
+                position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%);
+                padding: 2rem 3rem; background: ${bgColor};
+                color: white; border-radius: 24px; font-size: 2rem; font-weight: 700;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 10000;
+                animation: pulse 0.5s ease 2; text-align: center;
+            `;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 2000);
+            
+            // Reset bet for next question
+            currentBet = 100;
+        }
+
         function checkStreakBonus() {
             let bonus = 0;
             let message = '';
@@ -1696,15 +1842,20 @@
                 };
                 
                 grid.innerHTML += `
-                    <div class="team-box" style="background: ${team.bg};">
+                    <div class="team-box" style="background: ${team.bg}; cursor: pointer; transition: all 0.2s ease;" 
+                         onclick="assignPlayerToTeam('${team.id}')"
+                         onmouseover="if(selectedPlayerId) this.style.transform='scale(1.02)'"
+                         onmouseout="this.style.transform='scale(1)'">
                         <input type="text" 
                                id="teamName${i}" 
                                value="${team.name}" 
                                onchange="updateTeamName('${team.id}', this.value)"
+                               onclick="event.stopPropagation()"
                                style="width: 100%; padding: 0.5rem; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; background: rgba(255,255,255,0.2); color: white; font-weight: 700; font-size: 1.2rem; text-align: center; margin-bottom: 0.75rem;"
                                placeholder="Enter team name...">
-                        <div id="${team.id}-members" style="flex: 1;"></div>
-                        <p style="margin-top: auto; opacity: 0.8; font-size: 0.9rem;">Waiting for players...</p>
+                        <div id="${team.id}-members" style="flex: 1;">
+                            <p style="opacity: 0.7; font-size: 0.85rem;">No players yet</p>
+                        </div>
                     </div>
                 `;
             }
@@ -1714,6 +1865,15 @@
                     teamsEnabled: teamsEnabled,
                     teams: currentTeams
                 });
+            }
+            
+            // Refresh player display if players already joined
+            const playersSnapshot = await window.dbGet(window.dbRef(window.db, `games/${gamePin}/players`));
+            if (playersSnapshot.exists()) {
+                const playersData = playersSnapshot.val();
+                const playersList = Object.entries(playersData).map(([id, data]) => ({ id, ...data }));
+                updateUnassignedPlayers(playersList);
+                updateTeamRosters(playersList);
             }
         }
 
@@ -1852,6 +2012,65 @@
         }
         window.closePowerUpShop = closePowerUpShop;
 
+        // BETTING SYSTEM
+        function updateBetDisplay(value) {
+            currentBet = parseInt(value);
+            document.getElementById('betAmountDisplay').textContent = currentBet;
+            document.getElementById('winAmount').textContent = currentBet;
+            document.getElementById('loseAmount').textContent = currentBet;
+        }
+        window.updateBetDisplay = updateBetDisplay;
+
+        function showBettingScreen() {
+            if (!currentPlayer) return;
+            
+            const coins = getPlayerCoins(currentPlayer.name);
+            document.getElementById('bettingCoinsDisplay').textContent = `${coins} 🪙`;
+            
+            // Set slider max to current coins (or 500, whichever is lower)
+            const maxBet = Math.min(coins, 500);
+            document.getElementById('betSlider').max = maxBet;
+            
+            // Reset to safe bet
+            currentBet = Math.min(100, maxBet);
+            document.getElementById('betSlider').value = currentBet;
+            updateBetDisplay(currentBet);
+            
+            showScreen('bettingScreen');
+        }
+
+        function placeBet() {
+            const coins = getPlayerCoins(currentPlayer.name);
+            
+            if (currentBet > coins) {
+                showNotification('❌ Not enough coins for that bet!', 'error');
+                return;
+            }
+            
+            playSound('tickSound');
+            showPlayerQuestion();
+        }
+        window.placeBet = placeBet;
+
+        function showBettingResult(won, amount) {
+            const msg = document.createElement('div');
+            const bgColor = won ? 'linear-gradient(135deg, #2ecc71, #27ae60)' : 'linear-gradient(135deg, var(--orange-bright), #c0392b)';
+            const text = won ? `🎉 BET WON! +${amount} 🪙` : `💔 BET LOST! -${amount} 🪙`;
+            
+            msg.style.cssText = `
+                position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%);
+                padding: 2rem 3rem; background: ${bgColor};
+                color: white; border-radius: 24px; font-size: 2.5rem; font-weight: 700;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999;
+                animation: pulse 0.5s ease 2; text-align: center;
+            `;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 2000);
+            
+            updateCoinDisplay();
+        }
+
         // STATS SYSTEM
         function showGameStats() {
             const accuracy = gameStats.totalAnswers > 0 
@@ -1953,6 +2172,12 @@
         let bestStreak = 0;
         let startingCoins = 0;
         let coinsEarnedThisGame = 0;
+
+        // Betting System
+        let currentBet = 100;
+        let bettingEnabled = true;
+        let currentBet = 100;
+        let bettingEnabled = true;
 
         // TEAMS SYSTEM
         let teamsEnabled = false;
@@ -2550,14 +2775,163 @@
                         playSound('joinSound');
                     }
                     
-                    grid.innerHTML = playersList.map(p => `
-                        <div class="player-card">${p.name}</div>
-                    `).join('');
+                    // If teams are enabled, update unassigned players
+                    if (teamsEnabled) {
+                        updateUnassignedPlayers(playersList);
+                        updateTeamRosters(playersList);
+                    } else {
+                        grid.innerHTML = playersList.map(p => `
+                            <div class="player-card">${p.name}</div>
+                        `).join('');
+                    }
                 } else {
                     grid.innerHTML = '<p style="color: white; text-align: center;">Waiting for players...</p>';
                 }
             });
         }
+
+        function updateUnassignedPlayers(playersList) {
+            const unassignedDiv = document.getElementById('unassignedPlayers');
+            if (!unassignedDiv) return;
+            
+            const unassigned = playersList.filter(p => !p.team);
+            
+            if (unassigned.length === 0) {
+                unassignedDiv.innerHTML = '<p style="color: #999; font-style: italic;">All players assigned!</p>';
+            } else {
+                unassignedDiv.innerHTML = unassigned.map(p => `
+                    <div class="player-badge" data-player-id="${p.id}" style="
+                        padding: 0.5rem 1rem;
+                        background: var(--blue-sky);
+                        color: white;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        transition: all 0.2s ease;
+                    " onclick="selectPlayerForAssignment('${p.id}', '${p.name}')">
+                        ${p.name}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateTeamRosters(playersList) {
+            Object.keys(currentTeams).forEach(teamId => {
+                const membersDiv = document.getElementById(`${teamId}-members`);
+                if (membersDiv) {
+                    const teamPlayers = playersList.filter(p => p.team === teamId);
+                    if (teamPlayers.length > 0) {
+                        membersDiv.innerHTML = teamPlayers.map(p => `
+                            <div class="team-member-badge" style="
+                                background: rgba(255,255,255,0.25);
+                                padding: 0.5rem;
+                                border-radius: 8px;
+                                font-size: 0.9rem;
+                                margin-bottom: 0.5rem;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                            ">
+                                ${p.name}
+                                <span onclick="unassignPlayer('${p.id}')" style="cursor: pointer; opacity: 0.7; font-size: 1.1rem;">❌</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        membersDiv.innerHTML = '<p style="opacity: 0.7; font-size: 0.85rem;">No players yet</p>';
+                    }
+                }
+            });
+        }
+
+        let selectedPlayerId = null;
+        let selectedPlayerName = null;
+
+        function selectPlayerForAssignment(playerId, playerName) {
+            selectedPlayerId = playerId;
+            selectedPlayerName = playerName;
+            
+            // Highlight selected player
+            document.querySelectorAll('.player-badge').forEach(badge => {
+                badge.style.background = 'var(--blue-sky)';
+                badge.style.transform = 'scale(1)';
+            });
+            
+            const badge = document.querySelector(`[data-player-id="${playerId}"]`);
+            if (badge) {
+                badge.style.background = 'var(--orange-gold)';
+                badge.style.transform = 'scale(1.05)';
+            }
+            
+            // Highlight team boxes
+            document.querySelectorAll('.team-box').forEach(box => {
+                box.style.cursor = 'pointer';
+                box.style.opacity = '1';
+            });
+            
+            showNotification(`Click a team to assign ${playerName}`, 'info');
+        }
+        window.selectPlayerForAssignment = selectPlayerForAssignment;
+
+        async function assignPlayerToTeam(teamId) {
+            if (!selectedPlayerId) {
+                showNotification('Select a player first!', 'error');
+                return;
+            }
+            
+            try {
+                await window.dbUpdate(
+                    window.dbRef(window.db, `games/${gamePin}/players/${selectedPlayerId}`),
+                    { team: teamId }
+                );
+                
+                playSound('correctSound');
+                showNotification(`${selectedPlayerName} assigned to team!`, 'success');
+                
+                selectedPlayerId = null;
+                selectedPlayerName = null;
+            } catch (error) {
+                console.error('Error assigning player:', error);
+            }
+        }
+        window.assignPlayerToTeam = assignPlayerToTeam;
+
+        async function unassignPlayer(playerId) {
+            try {
+                await window.dbUpdate(
+                    window.dbRef(window.db, `games/${gamePin}/players/${playerId}`),
+                    { team: null }
+                );
+                playSound('tickSound');
+            } catch (error) {
+                console.error('Error unassigning player:', error);
+            }
+        }
+        window.unassignPlayer = unassignPlayer;
+
+        async function autoAssignPlayers() {
+            const playersSnapshot = await window.dbGet(window.dbRef(window.db, `games/${gamePin}/players`));
+            const playersData = playersSnapshot.val();
+            
+            if (!playersData) return;
+            
+            const players = Object.entries(playersData);
+            const teamIds = Object.keys(currentTeams);
+            let teamIndex = 0;
+            
+            for (const [playerId, playerData] of players) {
+                if (!playerData.team) {
+                    await window.dbUpdate(
+                        window.dbRef(window.db, `games/${gamePin}/players/${playerId}`),
+                        { team: teamIds[teamIndex] }
+                    );
+                    teamIndex = (teamIndex + 1) % teamIds.length;
+                }
+            }
+            
+            playSound('correctSound');
+            showNotification('Players auto-assigned!', 'success');
+        }
+        window.autoAssignPlayers = autoAssignPlayers;
 
         async function cancelGame() {
             if (playersListener) playersListener();
@@ -2670,7 +3044,13 @@
                 if (gameData.status === 'playing' && gameData.currentQuestion !== undefined) {
                     currentQuestionIndex = gameData.currentQuestion;
                     currentQuiz = gameData.quiz;
-                    showPlayerQuestion();
+                    
+                    // Show betting screen first
+                    if (bettingEnabled) {
+                        showBettingScreen();
+                    } else {
+                        showPlayerQuestion();
+                    }
                 } else if (gameData.status === 'results') {
                     showQuestionResultsForPlayer();
                 } else if (gameData.status === 'finished') {
@@ -2907,6 +3287,21 @@
             
             const basePoints = Math.floor((timeLeft / question.timeLimit) * 1000);
             const pointsEarned = isCorrect ? basePoints * pointsMultiplier : 0;
+
+            // BETTING SYSTEM - Handle bet win/loss
+            if (currentBet > 0) {
+                if (isCorrect) {
+                    // Win the bet!
+                    awardCoins(currentPlayer.name, currentBet);
+                    showBettingResult(true, currentBet);
+                } else {
+                    // Lose the bet
+                    const currentCoins = getPlayerCoins(currentPlayer.name);
+                    const lostAmount = Math.min(currentBet, currentCoins); // Can't lose more than you have
+                    localStorage.setItem(`player_${currentPlayer.name}_coins`, currentCoins - lostAmount);
+                    showBettingResult(false, lostAmount);
+                }
+            }
 
             // Award coins and handle streaks
             if (isCorrect) {
