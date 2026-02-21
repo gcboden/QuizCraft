@@ -2237,20 +2237,25 @@
         // Authentication State
         let currentUser = null;
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                console.log('User logged in:', user.email);
-                // User is signed in, show home screen
-                document.getElementById('loginScreen').classList.remove('active');
-                document.getElementById('signupScreen').classList.remove('active');
-                showScreen('homeScreen');
-            } else {
-                currentUser = null;
-                console.log('No user logged in');
-                // No user signed in, show login
-                showScreen('loginScreen');
-            }
+        // Wait for DOM to be ready before setting up auth
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    console.log('User logged in:', user.email);
+                    // User is signed in, show home screen
+                    const loginScreen = document.getElementById('loginScreen');
+                    const signupScreen = document.getElementById('signupScreen');
+                    if (loginScreen) loginScreen.classList.remove('active');
+                    if (signupScreen) signupScreen.classList.remove('active');
+                    showScreen('homeScreen');
+                } else {
+                    currentUser = null;
+                    console.log('No user logged in');
+                    // No user signed in, show login
+                    showScreen('loginScreen');
+                }
+            });
         });
 
         // Login with Email
